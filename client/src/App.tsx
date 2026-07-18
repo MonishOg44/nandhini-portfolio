@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router as WouterRouter } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -11,15 +11,17 @@ import { IntroPreloader } from "./components/IntroPreloader";
 import { CustomCursor } from "./components/CustomCursor";
 import { SmoothScroll } from "./components/SmoothScroll";
 
-function Router() {
+function AppRouter() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/credits"} component={CreatorCreditsPage} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <WouterRouter base={import.meta.env.DEV ? "" : "/nandhini-portfolio"}>
+      <Switch>
+        <Route path={"/"} component={Home} />
+        <Route path={"/credits"} component={CreatorCreditsPage} />
+        <Route path={"/404"} component={NotFound} />
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </WouterRouter>
   );
 }
 
@@ -37,7 +39,7 @@ function App() {
           
           <SmoothScroll>
             <Toaster />
-            <Router />
+            <AppRouter />
           </SmoothScroll>
         </TooltipProvider>
       </ThemeProvider>
