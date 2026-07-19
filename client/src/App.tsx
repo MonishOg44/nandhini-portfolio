@@ -12,38 +12,32 @@ import { CustomCursor } from "./components/CustomCursor";
 import { SmoothScroll } from "./components/SmoothScroll";
 import { TransitionProvider } from "./contexts/TransitionContext";
 
-function AppRouter() {
-  return (
-    <WouterRouter base="">
-      <Switch>
-        <Route path={"/"} component={Home} />
-        <Route path={"/credits"} component={CreatorCreditsPage} />
-        <Route path={"/404"} component={NotFound} />
-        {/* Final fallback route */}
-        <Route component={NotFound} />
-      </Switch>
-    </WouterRouter>
-  );
-}
-
 function App() {
   const [preloaderComplete, setPreloaderComplete] = useState(false);
 
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TransitionProvider>
-          <TooltipProvider>
-            {/* Awwwards $10,000 Premium Animations Suite */}
-            {!preloaderComplete && <IntroPreloader onComplete={() => setPreloaderComplete(true)} />}
-            <CustomCursor />
-            
-            <SmoothScroll>
-              <Toaster />
-              <AppRouter />
-            </SmoothScroll>
-          </TooltipProvider>
-        </TransitionProvider>
+        <WouterRouter base={import.meta.env.DEV ? "" : "/nandhini-portfolio"}>
+          <TransitionProvider>
+            <TooltipProvider>
+              {/* Awwwards $10,000 Premium Animations Suite */}
+              {!preloaderComplete && <IntroPreloader onComplete={() => setPreloaderComplete(true)} />}
+              <CustomCursor />
+              
+              <SmoothScroll>
+                <Toaster />
+                <Switch>
+                  <Route path={"/"} component={Home} />
+                  <Route path={"/credits"} component={CreatorCreditsPage} />
+                  <Route path={"/404"} component={NotFound} />
+                  {/* Final fallback route */}
+                  <Route component={NotFound} />
+                </Switch>
+              </SmoothScroll>
+            </TooltipProvider>
+          </TransitionProvider>
+        </WouterRouter>
       </ThemeProvider>
     </ErrorBoundary>
   );

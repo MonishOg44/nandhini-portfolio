@@ -229,7 +229,7 @@ const plugins = [
 ];
 
 export default defineConfig({
-  base: '/',
+  base: '/nandhini-portfolio/',
   plugins,
   resolve: {
     alias: {
