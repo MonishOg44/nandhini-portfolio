@@ -14,7 +14,7 @@ import { TransitionProvider } from "./contexts/TransitionContext";
 
 function AppRouter() {
   return (
-    <WouterRouter base={import.meta.env.DEV ? "" : "/nandhini-portfolio"}>
+    <WouterRouter base="">
       <Switch>
         <Route path={"/"} component={Home} />
         <Route path={"/credits"} component={CreatorCreditsPage} />

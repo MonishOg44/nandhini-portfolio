@@ -203,10 +203,33 @@ function vitePluginStorageProxy(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
+function copyIndexTo404Plugin(): Plugin {
+  return {
+    name: "copy-index-to-404",
+    closeBundle() {
+      const outDir = path.resolve(PROJECT_ROOT, "dist/public");
+      const indexPath = path.join(outDir, "index.html");
+      const fallbackPath = path.join(outDir, "404.html");
+      if (fs.existsSync(indexPath)) {
+        fs.copyFileSync(indexPath, fallbackPath);
+        console.log("✓ Copied index.html to 404.html for GitHub Pages fallback");
+      }
+    },
+  };
+}
+
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  vitePluginStorageProxy(),
+  copyIndexTo404Plugin()
+];
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/nandhini-portfolio/' : '/',
+  base: '/',
   plugins,
   resolve: {
     alias: {
