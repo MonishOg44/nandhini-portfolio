@@ -58,7 +58,7 @@ const timelineData: TimelineItem[] = [
     color: '#7c533c' // Terracotta
   },
   {
-    date: '2024 – 2025',
+    date: '2025 – 2026',
     role: 'President & Coordinator',
     organization: 'Diversity, Equity & Inclusivity (D.E.I.) Club',
     description: [
