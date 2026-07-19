@@ -1,135 +1,190 @@
 import { useEffect, useState } from 'react';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, Terminal } from 'lucide-react';
 
 export function LandscapeWarning() {
-  const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [glitchActive, setGlitchActive] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [activeLogIndex, setActiveLogIndex] = useState(0);
+
+  const logLines = [
+    '» SYSTEM BOOT: ORIENTATION_GUARD_v5.2.0',
+    '» RUNNING SENSORS... GYRO: OK | ACCEL: OK',
+    '» VIEWPORT ANALYZING... WIDE_RATIO DETECTED',
+    '» STATUS: COMPOSITION LOCK DOWN INITIATED',
+    '» SECURITY LEVEL: ALPHA-RESTRICTED',
+    '» LOCKING VIEWPORT SCROLL PROTOCOLS...',
+    '» ERROR: 0x889 - PORTRAIT MODE COMPILATION BROKEN',
+    '» PENDING CORE ALIGNMENT RE-ALIGNMENT...',
+    '» SCANNING DEVICE ORIENTATION RETRY IN PROGRESS...'
+  ];
 
   useEffect(() => {
-    const checkDeviceAndOrientation = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      setDimensions({ width, height });
-
-      const isLandscape = width > height;
-      
-      // Detect if it's a mobile/tablet touch device
-      const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-      // Typical mobile/tablet landscape sizes: width up to 1024px or height up to 600px
-      const isMobileSize = width <= 1024 && height <= 768;
-
-      setIsLandscapeMobile(isLandscape && isMobileSize && hasTouch);
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
     };
 
-    checkDeviceAndOrientation();
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
 
-    window.addEventListener('resize', checkDeviceAndOrientation);
-    window.addEventListener('orientationchange', checkDeviceAndOrientation);
-
-    // Dynamic glitch effect timer to add sci-fi character
+    // Glitch effect timer
     const glitchInterval = setInterval(() => {
       setGlitchActive(true);
-      setTimeout(() => setGlitchActive(false), 150);
-    }, 4000);
+      setTimeout(() => setGlitchActive(false), 120);
+    }, 4500);
+
+    // Progressive terminal logs
+    const logInterval = setInterval(() => {
+      setActiveLogIndex((prev) => {
+        if (prev < logLines.length) {
+          setTerminalLogs((logs) => [...logs, logLines[prev]]);
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 600);
 
     return () => {
-      window.removeEventListener('resize', checkDeviceAndOrientation);
-      window.removeEventListener('orientationchange', checkDeviceAndOrientation);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
       clearInterval(glitchInterval);
+      clearInterval(logInterval);
     };
   }, []);
-
-  if (!isLandscapeMobile) return null;
 
   return (
     <>
       <div className="landscape-warning-container">
-        {/* Animated Background Scan & Grids */}
+        {/* Futuristic Cyber Grids & Scanners */}
         <div className="hud-grid" />
-        <div className="hud-scanner" />
-        <div className="hud-ambient" />
+        <div className="hud-scanline-laser" />
+        <div className="hud-ambient-glow" />
+        <div className="hud-diagonal-stripes top" />
+        <div className="hud-diagonal-stripes bottom" />
 
-        {/* Framing Corner Brackets */}
+        {/* Dynamic Telemetry Accents */}
+        <div className="hud-telemetry-panel left-side select-none">
+          <div>LAT: 51.5074° N</div>
+          <div>LON: 0.1278° W</div>
+          <div>ALT: 84.2m</div>
+          <div>GRID: 4F_99</div>
+        </div>
+        <div className="hud-telemetry-panel right-side select-none">
+          <div>FPS: 60 // STABLE</div>
+          <div>MEM: 84.2MB</div>
+          <div>LOCK: FULL_SECURE</div>
+          <div>SYS: COMP_V5.2</div>
+        </div>
+
+        {/* Framing Corner Brackets with Notch Safety */}
         <div className="hud-bracket top-left" />
         <div className="hud-bracket top-right" />
         <div className="hud-bracket bottom-left" />
         <div className="hud-bracket bottom-right" />
 
-        {/* Status indicator bar top edge */}
-        <div className="hud-top-bar">
-          <span className="hud-dot pulsing-red" />
-          <span className="hud-bar-text">SYSTEM STATUS: ORIENTATION_LOCK_ACTIVE</span>
-          <span className="hud-bar-separator" />
-          <span className="hud-bar-text select-none">CODE: 504_COMPOSITION_WARN</span>
+        {/* Tech Header bar */}
+        <div className="hud-top-bar select-none">
+          <span className="hud-pulse-dot" />
+          <span className="hud-bar-title font-bold">CORE_GUARD // SCREEN ALIGNMENT CHECK</span>
+          <span className="hud-bar-spring" />
+          <span className="hud-bar-code">SYS_ERR: [0x504_MISALIGNED]</span>
         </div>
 
-        {/* Content Box - Split 2-Column Grid optimized for Landscape */}
+        {/* Main interactive HUD content */}
         <div className="hud-content">
-          {/* Left Column: Rotating Telemetry & Device Icon */}
+          {/* Column 1: Rotating Telemetry Compass & Phone animation */}
           <div className="hud-left-pane">
-            <div className="telemetry-wrapper">
-              <svg className="hud-circle-outer" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="46" stroke="rgba(230, 59, 46, 0.2)" strokeWidth="1" fill="none" />
-                <circle cx="50" cy="50" r="46" stroke="#e63b2e" strokeWidth="1.5" strokeDasharray="30 20 10 40" fill="none" />
+            <div className="hud-compass-wrapper">
+              {/* Complex Concentric HUD Circles */}
+              <svg className="hud-ring ring-1" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" stroke="#ff2e2e" strokeWidth="1.5" strokeDasharray="10 30 50 15 5 5" fill="none" opacity="0.3" />
+                <circle cx="50" cy="50" r="48" stroke="#ff2e2e" strokeWidth="2.5" strokeDasharray="40 10" fill="none" opacity="0.85" />
               </svg>
-              <svg className="hud-circle-inner" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="38" stroke="rgba(212, 175, 55, 0.15)" strokeWidth="1" strokeDasharray="5 5" fill="none" />
-                <circle cx="50" cy="50" r="38" stroke="#D4AF37" strokeWidth="1" strokeDasharray="80 40" fill="none" />
+              <svg className="hud-ring ring-2" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="#D4AF37" strokeWidth="1" strokeDasharray="5 5 15 5" fill="none" opacity="0.6" />
+                <circle cx="50" cy="50" r="40" stroke="#D4AF37" strokeWidth="1.5" strokeDasharray="80 20" fill="none" opacity="0.8" />
+              </svg>
+              <svg className="hud-ring ring-3" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="32" stroke="#ff2e2e" strokeWidth="0.8" strokeDasharray="2 2" fill="none" opacity="0.5" />
               </svg>
               
-              <div className="rotating-device-wrapper">
-                <div className="device-silhouette">
-                  <div className="device-screen">
-                    <div className="device-home-button" />
-                    <div className="device-camera" />
+              {/* Rotating Device Silhouette */}
+              <div className="hud-device-display">
+                <div className="hud-device-body">
+                  <div className="hud-device-screen">
+                    <div className="hud-device-sensor-bar" />
+                    <div className="hud-device-scan-bar" />
+                    <div className="hud-device-home-pill" />
                   </div>
                 </div>
-                <div className="rotation-arrow-wrapper">
-                  <svg className="rotation-arrow-svg" viewBox="0 0 100 100">
-                    <path d="M 15 50 A 35 35 0 0 1 85 50" fill="none" stroke="#e63b2e" strokeWidth="2" strokeDasharray="5 3" />
-                    <path d="M 85 50 A 35 35 0 0 1 15 50" fill="none" stroke="#e63b2e" strokeWidth="2" strokeDasharray="5 3" />
-                    <polygon points="85,50 90,40 80,42" fill="#e63b2e" />
-                    <polygon points="15,50 10,60 20,58" fill="#e63b2e" />
+                {/* Arrow Vector Ring */}
+                <div className="hud-vector-arrows">
+                  <svg viewBox="0 0 100 100">
+                    <path d="M 12 50 A 38 38 0 0 1 88 50" fill="none" stroke="#ff2e2e" strokeWidth="1.5" strokeDasharray="4 2" />
+                    <path d="M 88 50 A 38 38 0 0 1 12 50" fill="none" stroke="#ff2e2e" strokeWidth="1.5" strokeDasharray="4 2" />
+                    <polygon points="88,50 93,42 83,43" fill="#ff2e2e" />
+                    <polygon points="12,50 7,58 17,57" fill="#ff2e2e" />
                   </svg>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Warnings, Logs & Status */}
+          {/* Column 2: Sci-fi Warnings & Live logs console */}
           <div className="hud-right-pane">
-            <div className="warning-card">
-              <div className="warning-header">
-                <div className="warning-icon-bg">
-                  <ShieldAlert className="warning-icon" />
+            <div className="hud-warning-card">
+              <div className="hud-warning-header">
+                <div className="hud-warning-icon-wrapper">
+                  <ShieldAlert className="hud-warning-icon animate-pulse" />
                 </div>
-                <div className="warning-titles">
-                  <span className={`warning-tag ${glitchActive ? 'glitch-text' : ''}`}>
-                    {glitchActive ? '▲ CR1T1C4L_ERR' : '▲ CRITICAL ALIGNMENT'}
+                <div className="hud-warning-titles">
+                  <span className={`hud-warning-label ${glitchActive ? 'glitch' : ''}`}>
+                    {glitchActive ? '▲ CORE_MISALIGNMENT_ERR' : '▲ ALIGNMENT ERROR'}
                   </span>
-                  <h1 className="warning-title">ROTATION REQUIRED</h1>
+                  <h1 className="hud-warning-headline">PORTRAIT LOCK ACTIVE</h1>
                 </div>
               </div>
 
-              <p className="warning-description">
-                This website is built with highly detailed interactions tailored for a <strong className="text-white">portrait screen orientation</strong>. 
-                Please rotate your device back to portrait mode to experience the portfolio correctly.
+              <p className="hud-warning-body-text">
+                Composition safety systems have engaged. This interactive experience has been optimized exclusively for a 
+                <strong className="text-red-400"> portrait screen orientation</strong>. 
+                Please rotate your device back to portrait to resume.
               </p>
 
-              {/* Monospace telemetry logs */}
-              <div className="telemetry-logs">
-                <div className="log-line">
-                  <span className="log-label">[ENV]</span> DEVICE_TYPE: <span className="log-val text-amber-400">MOBILE_PORTABLE</span>
+              {/* Monospaced Live Boot Console logs */}
+              <div className="hud-console">
+                <div className="hud-console-header select-none">
+                  <Terminal className="hud-console-icon" />
+                  <span>LIVE_ORIENTATION_GUARD_BOOT_LOGS</span>
+                  <span className="hud-console-pulse-dot" />
                 </div>
-                <div className="log-line">
-                  <span className="log-label">[SYS]</span> CURR_RATIO: <span className="log-val text-red-500">{(dimensions.width / (dimensions.height || 1)).toFixed(2)} (LANDSCAPE)</span>
-                </div>
-                <div className="log-line">
-                  <span className="log-label">[SYS]</span> RESOLUTION: <span className="log-val text-amber-400">{dimensions.width}px x {dimensions.height}px</span>
-                </div>
-                <div className="log-line">
-                  <span className="log-label">[SYS]</span> STATE_LOCK: <span className="log-val text-red-500 font-bold animate-pulse">PENDING_USER_ROTATION...</span>
+                <div className="hud-console-output">
+                  {terminalLogs.map((log, i) => (
+                    <div key={i} className="hud-console-log-line">
+                      {log}
+                    </div>
+                  ))}
+                  {terminalLogs.length < logLines.length && (
+                    <div className="hud-console-log-line cursor-blink">_</div>
+                  )}
+                  {/* Dynamic Dimension Details */}
+                  {terminalLogs.length >= logLines.length && (
+                    <>
+                      <div className="hud-console-log-line text-amber-400">
+                        » RESOLUTION: {dimensions.width}px x {dimensions.height}px
+                      </div>
+                      <div className="hud-console-log-line text-amber-400">
+                        » RATIO: {(dimensions.width / (dimensions.height || 1)).toFixed(2)} (CRITICAL_LANDSCAPE)
+                      </div>
+                      <div className="hud-console-log-line text-red-500 font-bold animate-pulse">
+                        » SYSTEM_AWAITING_PHYSICAL_ROTATION...
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -138,185 +193,270 @@ export function LandscapeWarning() {
       </div>
 
       <style>{`
+        /* ── Landscape Warning Container (Obsidian Black) ── */
         .landscape-warning-container {
+          display: none; /* Controlled strictly by CSS media query to prevent JS bypass */
           position: fixed;
           inset: 0;
           z-index: 999999;
-          background-color: #050404;
+          background-color: #030202 !important; /* Force Obsidian Black background */
           color: #f5f0eb;
-          display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'Space Mono', monospace;
           overflow: hidden;
-          padding: 24px;
+          
+          /* Safe Area Notch Padding */
+          padding-left: max(32px, env(safe-area-inset-left));
+          padding-right: max(32px, env(safe-area-inset-right));
+          padding-top: max(24px, env(safe-area-inset-top));
+          padding-bottom: max(24px, env(safe-area-inset-bottom));
         }
 
-        /* ── Sci-Fi HUD Background Elements ── */
+        /* ── STRICT CSS RULES FOR ZERO BYPASS DELAY ── */
+        @media (max-width: 1024px) and (max-height: 768px) and (orientation: landscape) {
+          .landscape-warning-container {
+            display: flex !important;
+          }
+          
+          /* Force block scrolling of the background */
+          html, body {
+            overflow: hidden !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            background-color: #030202 !important;
+          }
+        }
+
+        /* ── Sci-Fi HUD Background grid ── */
         .hud-grid {
           position: absolute;
           inset: 0;
-          background-size: 32px 32px;
+          background-size: 36px 36px;
           background-image: 
-            linear-gradient(to right, rgba(230, 59, 46, 0.04) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(230, 59, 46, 0.04) 1px, transparent 1px);
+            linear-gradient(to right, rgba(255, 46, 46, 0.035) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 46, 46, 0.035) 1px, transparent 1px);
           pointer-events: none;
           z-index: 1;
         }
 
-        .hud-scanner {
+        /* ── Ambient Neon Red Glow ── */
+        .hud-ambient-glow {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at 50% 50%, rgba(255, 46, 46, 0.04) 0%, transparent 75%);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* ── Sweeping Laser Scanline ── */
+        .hud-scanline-laser {
           position: absolute;
           left: 0;
           right: 0;
-          height: 120px;
-          background: linear-gradient(to bottom, transparent, rgba(230, 59, 46, 0.08), transparent);
-          opacity: 0.8;
+          height: 140px;
+          background: linear-gradient(to bottom, 
+            transparent, 
+            rgba(255, 46, 46, 0.02) 40%, 
+            rgba(255, 46, 46, 0.12) 98%, 
+            #ff2e2e 100%
+          );
+          box-shadow: 0 4px 12px rgba(255, 46, 46, 0.2);
+          opacity: 0.85;
           pointer-events: none;
           z-index: 2;
-          animation: scan-vertical 5s linear infinite;
+          animation: scanline-sweep 6s linear infinite;
         }
 
-        .hud-ambient {
+        @keyframes scanline-sweep {
+          0% { transform: translateY(-140px); }
+          100% { transform: translateY(100vh); }
+        }
+
+        /* ── Diagonal HUD warning stripes ── */
+        .hud-diagonal-stripes {
           position: absolute;
-          inset: 0;
-          background: radial-gradient(circle at 50% 50%, rgba(230, 59, 46, 0.03) 0%, transparent 80%);
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        @keyframes scan-vertical {
-          0% {
-            transform: translateY(-120px);
-          }
-          100% {
-            transform: translateY(100vh);
-          }
-        }
-
-        /* ── Corner Brackets ── */
-        .hud-bracket {
-          position: absolute;
-          width: 24px;
-          height: 24px;
-          border: 2px solid rgba(230, 59, 46, 0.4);
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: repeating-linear-gradient(
+            -45deg,
+            rgba(255, 46, 46, 0.3),
+            rgba(255, 46, 46, 0.3) 8px,
+            transparent 8px,
+            transparent 16px
+          );
+          opacity: 0.6;
           z-index: 5;
           pointer-events: none;
         }
-        .top-left { top: 16px; left: 16px; border-right: none; border-bottom: none; }
-        .top-right { top: 16px; right: 16px; border-left: none; border-bottom: none; }
-        .bottom-left { bottom: 16px; left: 16px; border-right: none; border-top: none; }
-        .bottom-right { bottom: 16px; right: 16px; border-left: none; border-top: none; }
+        .hud-diagonal-stripes.top { top: 0; }
+        .hud-diagonal-stripes.bottom { bottom: 0; }
 
-        /* ── Top Bar ── */
+        /* ── Telemetry panels on sides ── */
+        .hud-telemetry-panel {
+          position: absolute;
+          font-size: 8px;
+          line-height: 1.8;
+          color: rgba(245, 240, 235, 0.25);
+          letter-spacing: 0.1em;
+          z-index: 5;
+          pointer-events: none;
+        }
+        .hud-telemetry-panel.left-side {
+          left: max(32px, env(safe-area-inset-left));
+          bottom: max(36px, env(safe-area-inset-bottom));
+          text-align: left;
+        }
+        .hud-telemetry-panel.right-side {
+          right: max(32px, env(safe-area-inset-right));
+          bottom: max(36px, env(safe-area-inset-bottom));
+          text-align: right;
+        }
+
+        /* ── Corner brackets ── */
+        .hud-bracket {
+          position: absolute;
+          width: 32px;
+          height: 32px;
+          border: 2px solid rgba(255, 46, 46, 0.45);
+          z-index: 6;
+          pointer-events: none;
+          filter: drop-shadow(0 0 4px rgba(255, 46, 46, 0.3));
+        }
+        .top-left { 
+          top: max(24px, env(safe-area-inset-top)); 
+          left: max(32px, env(safe-area-inset-left)); 
+          border-right: none; 
+          border-bottom: none; 
+        }
+        .top-right { 
+          top: max(24px, env(safe-area-inset-top)); 
+          right: max(32px, env(safe-area-inset-right)); 
+          border-left: none; 
+          border-bottom: none; 
+        }
+        .bottom-left { 
+          bottom: max(24px, env(safe-area-inset-bottom)); 
+          left: max(32px, env(safe-area-inset-left)); 
+          border-right: none; 
+          border-top: none; 
+        }
+        .bottom-right { 
+          bottom: max(24px, env(safe-area-inset-bottom)); 
+          right: max(32px, env(safe-area-inset-right)); 
+          border-left: none; 
+          border-top: none; 
+        }
+
+        /* ── HUD Top Bar ── */
         .hud-top-bar {
           position: absolute;
-          top: 16px;
-          left: 48px;
-          right: 48px;
-          height: 20px;
+          top: max(24px, env(safe-area-inset-top));
+          left: calc(max(32px, env(safe-area-inset-left)) + 48px);
+          right: calc(max(32px, env(safe-area-inset-right)) + 48px);
+          height: 24px;
           display: flex;
           align-items: center;
           font-size: 8px;
-          letter-spacing: 0.15em;
-          color: rgba(245, 240, 235, 0.45);
-          border-bottom: 1px solid rgba(230, 59, 46, 0.15);
-          padding-bottom: 4px;
+          letter-spacing: 0.2em;
+          color: rgba(245, 240, 235, 0.4);
+          border-bottom: 1px solid rgba(255, 46, 46, 0.15);
           z-index: 5;
           pointer-events: none;
         }
-        .hud-dot {
-          width: 5px;
-          height: 5px;
+
+        .hud-pulse-dot {
+          width: 6px;
+          height: 6px;
+          background-color: #ff2e2e;
           border-radius: 50%;
-          margin-right: 8px;
+          box-shadow: 0 0 8px #ff2e2e;
+          margin-right: 12px;
+          animation: pulse-ring 2s ease-in-out infinite;
         }
-        .pulsing-red {
-          background-color: #e63b2e;
-          box-shadow: 0 0 6px #e63b2e;
-          animation: pulse-glow 1.5s ease-in-out infinite;
-        }
-        .hud-bar-separator {
+
+        .hud-bar-spring {
           flex-grow: 1;
-          height: 1px;
-          background: linear-gradient(to right, rgba(230, 59, 46, 0.15), transparent 40%, transparent 60%, rgba(230, 59, 46, 0.15));
-          margin: 0 16px;
         }
 
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 1; }
+        @keyframes pulse-ring {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 1; filter: brightness(1.2); }
         }
 
-        /* ── Content Grid Layout ── */
+        /* ── Grid Layout ── */
         .hud-content {
           position: relative;
           z-index: 10;
           display: grid;
           grid-template-columns: 2.2fr 3.8fr;
-          gap: 32px;
+          gap: 40px;
           width: 100%;
-          max-width: 860px;
+          max-width: 900px;
           align-items: center;
+          margin-top: 16px;
         }
 
-        /* ── Left Pane (Device Rotation Display) ── */
+        /* ── Left Pane (Complex 3D Telemetry compass & phone) ── */
         .hud-left-pane {
           display: flex;
           justify-content: center;
           align-items: center;
         }
 
-        .telemetry-wrapper {
+        .hud-compass-wrapper {
           position: relative;
-          width: clamp(140px, 25vw, 190px);
-          height: clamp(140px, 25vw, 190px);
+          width: clamp(160px, 28vw, 210px);
+          height: clamp(160px, 28vw, 210px);
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        .hud-circle-outer {
+        .hud-ring {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          animation: spin-clockwise 25s linear infinite;
+          pointer-events: none;
         }
 
-        .hud-circle-inner {
-          position: absolute;
-          inset: 8%;
-          width: 84%;
-          height: 84%;
-          animation: spin-counter-clockwise 15s linear infinite;
+        .hud-ring.ring-1 {
+          animation: spin-cw 22s linear infinite;
         }
 
-        @keyframes spin-clockwise {
+        .hud-ring.ring-2 {
+          animation: spin-ccw 14s linear infinite;
+        }
+
+        @keyframes spin-cw {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        @keyframes spin-counter-clockwise {
+
+        @keyframes spin-ccw {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(-360deg); }
         }
 
-        .rotating-device-wrapper {
+        .hud-device-display {
           position: relative;
-          width: 44px;
-          height: 82px;
+          width: 48px;
+          height: 90px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        .device-silhouette {
+        .hud-device-body {
           position: absolute;
-          width: 44px;
-          height: 82px;
-          border: 2px solid rgba(245, 240, 235, 0.85);
-          border-radius: 6px;
-          background-color: rgba(5, 4, 4, 0.9);
-          box-shadow: 0 0 15px rgba(245, 240, 235, 0.1);
+          width: 48px;
+          height: 90px;
+          border: 2px solid rgba(245, 240, 235, 0.95);
+          border-radius: 8px;
+          background-color: rgba(3, 2, 2, 0.95);
+          box-shadow: 0 0 20px rgba(255, 46, 46, 0.15);
           animation: rotate-device 4s cubic-bezier(0.77, 0, 0.175, 1) infinite;
           transform-origin: center center;
           display: flex;
@@ -324,265 +464,247 @@ export function LandscapeWarning() {
           justify-content: center;
         }
 
-        .device-screen {
+        .hud-device-screen {
           position: relative;
-          width: 38px;
-          height: 70px;
-          border: 1px solid rgba(245, 240, 235, 0.2);
-          border-radius: 3px;
+          width: 42px;
+          height: 78px;
+          border: 1px solid rgba(245, 240, 235, 0.18);
+          border-radius: 4px;
+          overflow: hidden;
         }
 
-        .device-home-button {
-          position: absolute;
-          bottom: 2px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 4px;
-          height: 4px;
-          border-radius: 50%;
-          border: 1px solid rgba(245, 240, 235, 0.4);
-        }
-
-        .device-camera {
+        .hud-device-sensor-bar {
           position: absolute;
           top: 2px;
           left: 50%;
           transform: translateX(-50%);
-          width: 3px;
+          width: 14px;
           height: 3px;
-          border-radius: 50%;
-          background-color: rgba(245, 240, 235, 0.4);
+          border-radius: 2px;
+          background-color: rgba(245, 240, 235, 0.35);
         }
 
-        .rotation-arrow-wrapper {
+        .hud-device-home-pill {
           position: absolute;
-          inset: -22px;
+          bottom: 2px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 12px;
+          height: 2px;
+          border-radius: 1px;
+          background-color: rgba(245, 240, 235, 0.35);
+        }
+
+        /* Glowing screen scanner */
+        .hud-device-scan-bar {
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: 12px;
+          background: linear-gradient(to bottom, transparent, rgba(255, 46, 46, 0.35), transparent);
+          animation: device-scan 2s ease-in-out infinite;
+        }
+
+        @keyframes device-scan {
+          0% { top: -12px; }
+          50% { top: 78px; }
+          100% { top: -12px; }
+        }
+
+        .hud-vector-arrows {
+          position: absolute;
+          inset: -28px;
           pointer-events: none;
         }
-        
-        .rotation-arrow-svg {
+
+        .hud-vector-arrows svg {
           width: 100%;
           height: 100%;
-          opacity: 0.7;
-          animation: arrow-glow 2s ease-in-out infinite;
+          opacity: 0.65;
+          animation: glow-pulse-vector 2s ease-in-out infinite;
         }
 
         @keyframes rotate-device {
-          0%, 15% {
-            transform: rotate(90deg);
-          }
-          40%, 65% {
-            transform: rotate(0deg);
-          }
-          85%, 100% {
-            transform: rotate(90deg);
-          }
+          0%, 15% { transform: rotate(90deg); }
+          40%, 65% { transform: rotate(0deg); }
+          85%, 100% { transform: rotate(90deg); }
         }
 
-        @keyframes arrow-glow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.8; }
+        @keyframes glow-pulse-vector {
+          0%, 100% { opacity: 0.35; filter: drop-shadow(0 0 2px rgba(255, 46, 46, 0.1)); }
+          50% { opacity: 0.8; filter: drop-shadow(0 0 8px rgba(255, 46, 46, 0.4)); }
         }
 
-        /* ── Right Pane (Texts and Logs) ── */
+        /* ── Right Pane ── */
         .hud-right-pane {
           display: flex;
           flex-direction: column;
         }
 
-        .warning-card {
+        .hud-warning-card {
           width: 100%;
-          text-align: left;
         }
 
-        .warning-header {
+        .hud-warning-header {
           display: flex;
           align-items: center;
           gap: 16px;
-          margin-bottom: 12px;
+          margin-bottom: 16px;
         }
 
-        .warning-icon-bg {
+        .hud-warning-icon-wrapper {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 44px;
-          height: 44px;
+          width: 48px;
+          height: 48px;
           border-radius: 4px;
-          background-color: rgba(230, 59, 46, 0.12);
-          border: 1px solid rgba(230, 59, 46, 0.35);
-          box-shadow: 0 0 10px rgba(230, 59, 46, 0.15);
+          background-color: rgba(255, 46, 46, 0.1);
+          border: 1px solid rgba(255, 46, 46, 0.4);
+          box-shadow: 0 0 12px rgba(255, 46, 46, 0.2);
         }
 
-        .warning-icon {
-          width: 22px;
-          height: 22px;
-          color: #e63b2e;
+        .hud-warning-icon {
+          width: 24px;
+          height: 24px;
+          color: #ff2e2e;
+          filter: drop-shadow(0 0 4px #ff2e2e);
         }
 
-        .warning-titles {
+        .hud-warning-titles {
           display: flex;
           flex-direction: column;
         }
 
-        .warning-tag {
+        .hud-warning-label {
           font-size: 8px;
           font-weight: 700;
-          letter-spacing: 0.25em;
-          color: #e63b2e;
-          text-shadow: 0 0 4px rgba(230, 59, 46, 0.4);
+          letter-spacing: 0.3em;
+          color: #ff2e2e;
+          text-shadow: 0 0 6px rgba(255, 46, 46, 0.4);
         }
 
-        .warning-title {
-          font-family: 'Space Mono', monospace; /* Futuristic look */
-          font-size: clamp(16px, 3.5vw, 22px);
-          font-weight: 700;
-          letter-spacing: 0.05em;
-          color: #ffffff;
-          line-height: 1.1;
-          margin: 2px 0 0 0;
-        }
-
-        .warning-description {
-          font-size: clamp(10px, 2vw, 12px);
-          line-height: 1.5;
-          color: rgba(245, 240, 235, 0.7);
-          margin-bottom: 16px;
-        }
-
-        /* ── Telemetry Logs ── */
-        .telemetry-logs {
-          background-color: rgba(5, 4, 4, 0.5);
-          border: 1px solid rgba(230, 59, 46, 0.12);
-          border-radius: 4px;
-          padding: 10px 14px;
-          margin-bottom: 18px;
-        }
-
-        .log-line {
-          font-size: clamp(8px, 1.8vw, 10px);
-          line-height: 1.6;
-          color: rgba(245, 240, 235, 0.6);
-          letter-spacing: 0.05em;
-        }
-
-        .log-label {
-          color: rgba(230, 59, 46, 0.65);
-        }
-
-        .log-val {
-          font-weight: 600;
-        }
-
-        /* ── Sci-Fi Override Button ── */
-        .hud-override-btn {
-          position: relative;
-          background-color: transparent;
-          border: 1px solid rgba(212, 175, 55, 0.4);
-          color: #D4AF37;
-          border-radius: 4px;
+        .hud-warning-headline {
           font-family: 'Space Mono', monospace;
-          font-size: clamp(9px, 2.2vw, 11px);
+          font-size: clamp(18px, 3.8vw, 24px);
           font-weight: 700;
-          letter-spacing: 0.18em;
-          padding: 10px 20px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          overflow: hidden;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .hud-override-btn:hover {
-          background-color: rgba(212, 175, 55, 0.08);
-          border-color: #D4AF37;
+          letter-spacing: 0.08em;
           color: #ffffff;
-          box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+          margin: 3px 0 0 0;
+          line-height: 1.1;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
 
-        .btn-content {
-          position: relative;
-          z-index: 2;
+        .hud-warning-body-text {
+          font-size: clamp(10px, 2vw, 12px);
+          line-height: 1.6;
+          color: rgba(245, 240, 235, 0.65);
+          margin-bottom: 18px;
+          letter-spacing: 0.02em;
+        }
+
+        /* ── Live Terminal Console ── */
+        .hud-console {
+          border: 1px solid rgba(255, 46, 46, 0.18);
+          background-color: rgba(3, 2, 2, 0.85);
+          border-radius: 4px;
+          box-shadow: inset 0 0 12px rgba(255, 46, 46, 0.05);
+          overflow: hidden;
+          z-index: 10;
+        }
+
+        .hud-console-header {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
+          background-color: rgba(255, 46, 46, 0.06);
+          border-bottom: 1px solid rgba(255, 46, 46, 0.15);
+          padding: 8px 12px;
+          font-size: 8px;
+          letter-spacing: 0.12em;
+          color: rgba(245, 240, 235, 0.45);
         }
 
-        .btn-icon {
-          width: 13px;
-          height: 13px;
+        .hud-console-icon {
+          width: 11px;
+          height: 11px;
+          color: rgba(255, 46, 46, 0.7);
         }
 
-        .btn-scanner {
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 50%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.15), transparent);
-          z-index: 1;
-          animation: btn-sweep 4s linear infinite;
+        .hud-console-pulse-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background-color: #ff2e2e;
+          margin-left: auto;
+          animation: pulse-ring 1s infinite;
         }
 
-        @keyframes btn-sweep {
-          0% { left: -100%; }
-          30% { left: 150%; }
-          100% { left: 150%; }
+        .hud-console-output {
+          padding: 10px 14px;
+          height: clamp(90px, 18vw, 125px);
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          text-align: left;
         }
 
-        /* ── Glitch Text Effect ── */
-        .glitch-text {
-          animation: glitch-anim 0.15s linear infinite;
-          text-shadow: 1px 0 #00fffa, -1px 0 #e63b2e;
+        .hud-console-log-line {
+          font-size: clamp(8px, 1.8vw, 9.5px);
+          line-height: 1.4;
+          color: rgba(255, 46, 46, 0.75);
+          letter-spacing: 0.05em;
+          word-break: break-all;
         }
 
-        @keyframes glitch-anim {
+        .cursor-blink {
+          animation: blink 0.8s steps(2, start) infinite;
+        }
+
+        @keyframes blink {
+          to { visibility: hidden; }
+        }
+
+        /* ── Glitch Text Animations ── */
+        .glitch {
+          animation: glitch-keyframes 0.15s linear infinite;
+          text-shadow: 1px 0 #00ffff, -1px 0 #ff2e2e;
+        }
+
+        @keyframes glitch-keyframes {
           0% { transform: translate(0); }
-          20% { transform: translate(-1px, 1px); }
-          40% { transform: translate(-1px, -1px); }
-          60% { transform: translate(1px, 1px); }
-          80% { transform: translate(1px, -1px); }
+          25% { transform: translate(-1px, 0.5px); }
+          50% { transform: translate(0.5px, -1px); }
+          75% { transform: translate(-0.5px, -0.5px); }
           100% { transform: translate(0); }
         }
 
-        /* ── Responsive adjustments for very small landscape screens (like iPhone SE landscape) ── */
-        @media (max-height: 380px) {
+        /* ── Responsiveness overrides for compact devices (e.g. smaller screens) ── */
+        @media (max-height: 400px) {
           .landscape-warning-container {
-            padding: 12px;
-          }
-          .hud-top-bar {
-            display: none;
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
           }
           .hud-bracket {
-            width: 12px;
-            height: 12px;
-          }
-          .hud-content {
-            gap: 16px;
-          }
-          .warning-description {
-            margin-bottom: 8px;
-          }
-          .telemetry-logs {
-            padding: 6px 10px;
-            margin-bottom: 8px;
-          }
-          .hud-override-btn {
-            padding: 6px 12px;
-          }
-          .warning-header {
-            margin-bottom: 6px;
-          }
-          .warning-icon-bg {
-            width: 32px;
-            height: 32px;
-          }
-          .warning-icon {
             width: 16px;
             height: 16px;
           }
+          .hud-bracket.top-left { top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); }
+          .hud-bracket.top-right { top: max(12px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); }
+          .hud-bracket.bottom-left { bottom: max(12px, env(safe-area-inset-bottom)); left: max(16px, env(safe-area-inset-left)); }
+          .hud-bracket.bottom-right { bottom: max(12px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
+          
+          .hud-top-bar { display: none; }
+          .hud-telemetry-panel { display: none; }
+          .hud-content { gap: 20px; }
+          .hud-warning-header { margin-bottom: 8px; }
+          .hud-warning-icon-wrapper { width: 36px; height: 36px; }
+          .hud-warning-icon { width: 18px; height: 18px; }
+          .hud-warning-body-text { margin-bottom: 10px; }
+          .hud-console-output { height: 75px; padding: 6px 10px; }
         }
       `}</style>
     </>
