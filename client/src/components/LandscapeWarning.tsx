@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 
 export function LandscapeWarning() {
   const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [isBypassed, setIsBypassed] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
 
   useEffect(() => {
-    // If the user has already bypassed this session, don't show it again
-    const sessionBypass = sessionStorage.getItem('landscape_bypass') === 'true';
-    if (sessionBypass) {
-      setIsBypassed(true);
-      return;
-    }
-
     const checkDeviceAndOrientation = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -48,12 +40,7 @@ export function LandscapeWarning() {
     };
   }, []);
 
-  const handleBypass = () => {
-    setIsBypassed(true);
-    sessionStorage.setItem('landscape_bypass', 'true');
-  };
-
-  if (isBypassed || !isLandscapeMobile) return null;
+  if (!isLandscapeMobile) return null;
 
   return (
     <>
@@ -110,7 +97,7 @@ export function LandscapeWarning() {
             </div>
           </div>
 
-          {/* Right Column: Warnings, Logs & Override button */}
+          {/* Right Column: Warnings, Logs & Status */}
           <div className="hud-right-pane">
             <div className="warning-card">
               <div className="warning-header">
@@ -145,20 +132,6 @@ export function LandscapeWarning() {
                   <span className="log-label">[SYS]</span> STATE_LOCK: <span className="log-val text-red-500 font-bold animate-pulse">PENDING_USER_ROTATION...</span>
                 </div>
               </div>
-
-              {/* Sci-Fi Override button */}
-              <button 
-                onClick={handleBypass} 
-                className="hud-override-btn"
-                aria-label="Override orientation warning"
-              >
-                <span className="btn-glitch-layer" />
-                <span className="btn-content">
-                  <AlertTriangle className="btn-icon" />
-                  BYPASS SYSTEM OVERRIDE
-                </span>
-                <span className="btn-scanner" />
-              </button>
             </div>
           </div>
         </div>
