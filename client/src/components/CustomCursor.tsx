@@ -8,12 +8,6 @@ export function CustomCursor() {
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
-    // Disable custom cursor on mobile touchscreens
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    if (isMobile) {
-      return;
-    }
-
     let mx = 0;
     let my = 0;
     let rx = 0;
@@ -25,11 +19,22 @@ export function CustomCursor() {
       setHidden(false);
     };
 
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches && e.touches[0]) {
+        mx = e.touches[0].clientX;
+        my = e.touches[0].clientY;
+        setHidden(false);
+      }
+    };
+
     const onMouseLeave = () => {
       setHidden(true);
     };
 
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchstart', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onMouseLeave);
     document.addEventListener('mouseleave', onMouseLeave);
 
     // Dynamic frame loop using lerp translation
@@ -69,6 +74,9 @@ export function CustomCursor() {
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchstart', onTouchMove);
+      window.removeEventListener('touchend', onMouseLeave);
       document.removeEventListener('mouseleave', onMouseLeave);
       window.removeEventListener('mouseover', handleMouseOver);
       cancelAnimationFrame(rafId);
@@ -79,6 +87,15 @@ export function CustomCursor() {
 
   return (
     <>
+      {/* Hide native cursor on devices with mouse */}
+      <style>{`
+        @media (pointer: fine) {
+          body, a, button, [role="button"], input, select, textarea, canvas {
+            cursor: none !important;
+          }
+        }
+      `}</style>
+
       {/* Inner Dot Wrapper (Zero transition conflicts) */}
       <div
         ref={dotRef}
@@ -87,7 +104,7 @@ export function CustomCursor() {
           top: 0,
           left: 0,
           pointerEvents: 'none',
-          zIndex: 999999,
+          zIndex: 2147483647,
           willChange: 'transform',
         }}
       >
@@ -111,7 +128,7 @@ export function CustomCursor() {
           top: 0,
           left: 0,
           pointerEvents: 'none',
-          zIndex: 999998,
+          zIndex: 2147483646,
           willChange: 'transform',
         }}
       >

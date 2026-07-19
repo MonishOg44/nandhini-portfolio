@@ -16,10 +16,10 @@ interface Particle {
 export function Activities() {
   const singingCanvasRef = useRef<HTMLCanvasElement>(null);
   const dancingCanvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   const [isSingingHovered, setIsSingingHovered] = useState(false);
   const [isDancingHovered, setIsDancingHovered] = useState(false);
-  
+
   // Audio state mimic for visualizer
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioVisualizerRaf = useRef<number | null>(null);
@@ -29,8 +29,45 @@ export function Activities() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
 
+  // Interactive Dance step tracker states
+  const [danceStyle, setDanceStyle] = useState<'jazz' | 'contemporary' | 'hiphop'>('jazz');
+  const [activeStep, setActiveStep] = useState(0);
+
   useEffect(() => {
-    const audio = new Audio('/song.mp3');
+    let interval: number | undefined;
+    if (isDancingHovered) {
+      interval = window.setInterval(() => {
+        setActiveStep((prev) => (prev + 1) % 4);
+      }, 600);
+    } else {
+      setActiveStep(0);
+    }
+    return () => clearInterval(interval);
+  }, [isDancingHovered]);
+
+  const danceSteps = {
+    jazz: [
+      { name: 'Chassé', action: 'Slide & Glide', icon: '⟵' },
+      { name: 'Jazz Square', action: 'Box Step Cross', icon: '⤧' },
+      { name: 'Kick Ball Change', action: 'Quick Weight Shift', icon: '⤾' },
+      { name: 'Pivot Turn', action: '180° Body Rotation', icon: '↻' }
+    ],
+    contemporary: [
+      { name: 'Fall & Recover', action: 'Release Weight', icon: '⤓' },
+      { name: 'Floor Sweep', action: 'Leg Extension Roll', icon: '⤾' },
+      { name: 'Arabesque Lift', action: 'Single Leg Balance', icon: '⤒' },
+      { name: 'Suspended Tilt', action: 'Off-Axis Extension', icon: '⤢' }
+    ],
+    hiphop: [
+      { name: 'Bounce Step', action: 'Low Groove Rhythm', icon: '⇅' },
+      { name: 'Chest Pop', action: 'Sharp Contraction', icon: '⤞' },
+      { name: 'Slide & Drag', action: 'Sideway Transfer', icon: '⟶' },
+      { name: 'Freeze Lock', action: 'Sharp Pose Hold', icon: '🔒' }
+    ]
+  };
+
+  useEffect(() => {
+    const audio = new Audio(`${import.meta.env.BASE_URL}song.mp3`);
     audioRef.current = audio;
 
     const handleTimeUpdate = () => {
@@ -275,7 +312,7 @@ export function Activities() {
   }, [isPlayingAudio]);
 
   return (
-    <section 
+    <section
       className="py-24 px-6 md:px-12 lg:px-24"
       style={{
         backgroundColor: '#fbf8f5', // Editorial cream canvas
@@ -283,7 +320,7 @@ export function Activities() {
         overflow: 'hidden',
       }}
     >
-      
+
       {/* ── Section Title block ── */}
       <div style={{
         marginBottom: '60px',
@@ -303,11 +340,11 @@ export function Activities() {
         }}>
           creative outlets
         </span>
-        
+
         <div style={{ marginLeft: '0px', width: '100%' }}>
-          <PremiumTextRipple 
-            text="Arts &amp; Rhythm" 
-            fontSize={62} 
+          <PremiumTextRipple
+            text="Arts &amp; Rhythm"
+            fontSize={62}
             fontFamily="'Cormorant Garamond', serif"
             fontWeightStyle="italic 500"
           />
@@ -315,16 +352,16 @@ export function Activities() {
       </div>
 
       {/* ── Scrapbook Cards Layout Grid ── */}
-      <div 
+      <div
         className="grid grid-cols-1 md:grid-cols-2 gap-10"
         style={{
           position: 'relative',
           zIndex: 5,
         }}
       >
-        
+
         {/* CARD 1: Singing (Vocal Expression) */}
-        <div 
+        <div
           onMouseEnter={() => setIsSingingHovered(true)}
           onMouseLeave={() => {
             setIsSingingHovered(false);
@@ -335,11 +372,11 @@ export function Activities() {
             border: '1px solid rgba(17, 17, 17, 0.08)',
             padding: '30px',
             position: 'relative',
-            boxShadow: isSingingHovered 
-              ? '4px 12px 30px rgba(0,0,0,0.06)' 
+            boxShadow: isSingingHovered
+              ? '4px 12px 30px rgba(0,0,0,0.06)'
               : '2px 4px 15px rgba(0,0,0,0.03)',
-            transform: isSingingHovered 
-              ? 'rotate(-1deg) translateY(-5px)' 
+            transform: isSingingHovered
+              ? 'rotate(-1deg) translateY(-5px)'
               : 'rotate(0.5deg)',
             transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
             cursor: 'default',
@@ -370,8 +407,8 @@ export function Activities() {
             }}>
               vocal expression / 01
             </span>
-            
-            <button 
+
+            <button
               onClick={() => setIsPlayingAudio(!isPlayingAudio)}
               style={{
                 background: isPlayingAudio ? '#111111' : 'transparent',
@@ -423,8 +460,8 @@ export function Activities() {
             overflow: 'hidden',
           }}>
             {/* Canvas layer for floating notes */}
-            <canvas 
-              ref={singingCanvasRef} 
+            <canvas
+              ref={singingCanvasRef}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -632,13 +669,13 @@ export function Activities() {
                 opacity: isPlayingAudio ? 1 : 0.25,
                 transition: 'opacity 0.3s ease',
               }}>
-                <canvas 
-                  ref={visualizerCanvasRef} 
+                <canvas
+                  ref={visualizerCanvasRef}
                   style={{
                     width: '100px',
                     height: '34px',
                     display: 'block',
-                  }} 
+                  }}
                 />
               </div>
 
@@ -683,7 +720,7 @@ export function Activities() {
         </div>
 
         {/* CARD 2: Dancing (Movement & Rhythm) */}
-        <div 
+        <div
           onMouseEnter={() => setIsDancingHovered(true)}
           onMouseLeave={() => setIsDancingHovered(false)}
           style={{
@@ -691,11 +728,11 @@ export function Activities() {
             border: '1px solid rgba(17, 17, 17, 0.08)',
             padding: '30px',
             position: 'relative',
-            boxShadow: isDancingHovered 
-              ? '4px 12px 30px rgba(0,0,0,0.06)' 
+            boxShadow: isDancingHovered
+              ? '4px 12px 30px rgba(0,0,0,0.06)'
               : '2px 4px 15px rgba(0,0,0,0.03)',
-            transform: isDancingHovered 
-              ? 'rotate(1.2deg) translateY(-5px)' 
+            transform: isDancingHovered
+              ? 'rotate(1.2deg) translateY(-5px)'
               : 'rotate(-0.5deg)',
             transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
             cursor: 'default',
@@ -751,7 +788,7 @@ export function Activities() {
             color: 'rgba(17, 17, 17, 0.7)',
             margin: '0 0 20px 0',
           }}>
-            For me, dancing is the physical embodiment of structure and rhythm. Just as I rely on balanced flow in strategic finance, I use choreography to master timing, precision, and spatial coordination. I practice both classical and contemporary forms to keep my mind sharp and my body in sync.
+            For me, dancing is the physical embodiment of structure and rhythm. Just as I rely on balanced flow in strategic finance, I use choreography to master timing, precision, and spatial coordination. I practice both western and contemporary forms to keep my mind sharp and my body in sync.
           </p>
 
           {/* Dancing Graphic / Rhythm visualizer pad */}
@@ -765,8 +802,8 @@ export function Activities() {
             justifyContent: 'center',
             overflow: 'hidden',
           }}>
-            <canvas 
-              ref={dancingCanvasRef} 
+            <canvas
+              ref={dancingCanvasRef}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -786,7 +823,7 @@ export function Activities() {
               zIndex: 3,
             }}>
               {[0, 1, 2, 3].map((i) => (
-                <div 
+                <div
                   key={i}
                   style={{
                     height: '24px',
@@ -802,6 +839,144 @@ export function Activities() {
             </div>
           </div>
 
+          {/* Interactive Choreography Step Guide */}
+          <div style={{
+            marginTop: '20px',
+            background: '#faf6f0', // Warm scrapbook paper
+            border: '1px solid rgba(17, 17, 17, 0.08)',
+            borderRadius: '8px',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }}>
+            {/* Header + Selector Buttons */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+                <span style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: '9px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.15em',
+                  color: 'rgba(17, 17, 17, 0.45)',
+                }}>
+                  Interactive Choreographer / Routine Selector
+                </span>
+                <span style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: '9px',
+                  color: '#e63b2e',
+                  fontWeight: 'bold',
+                }}>
+                  {isDancingHovered ? '● LIVE PATTERN' : '○ HOVER TO PLAY'}
+                </span>
+              </div>
+
+              {/* Style Buttons */}
+              <div style={{
+                display: 'flex',
+                gap: '6px',
+              }}>
+                {(['jazz', 'contemporary', 'hiphop'] as const).map((style) => (
+                  <button
+                    key={style}
+                    onClick={() => setDanceStyle(style)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: danceStyle === style ? '#111111' : 'transparent',
+                      color: danceStyle === style ? '#ffffff' : '#111111',
+                      border: '1.5px solid #111111',
+                      borderRadius: '4px',
+                      padding: '4px 6px',
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: '9px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {style === 'jazz' ? 'Western Jazz' : style === 'contemporary' ? 'Contemporary' : 'Hip Hop'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual Beat/Step Steps Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '8px',
+              minHeight: '130px',
+            }}>
+              {danceSteps[danceStyle].map((step, idx) => {
+                const isActive = isDancingHovered && activeStep === idx;
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      backgroundColor: isActive ? '#111111' : '#ffffff',
+                      color: isActive ? '#ffffff' : '#111111',
+                      border: isActive ? '1px solid #111111' : '1px solid rgba(17, 17, 17, 0.1)',
+                      borderRadius: '6px',
+                      padding: '8px 6px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      gap: '4px',
+                      height: '120px',
+                      overflow: 'hidden',
+                      boxShadow: isActive ? '0 4px 10px rgba(0,0,0,0.1)' : 'none',
+                      transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                      transition: 'all 0.25s cubic-bezier(0.25, 1, 0.5, 1)',
+                    }}
+                  >
+                    <span style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: '8px',
+                      opacity: isActive ? 0.6 : 0.4,
+                    }}>
+                      BEAT {idx + 1}
+                    </span>
+                    <span style={{
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      margin: '2px 0',
+                    }}>
+                      {step.icon}
+                    </span>
+                    <span style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '9px',
+                      fontWeight: 'bold',
+                      lineHeight: '1.2',
+                    }}>
+                      {step.name}
+                    </span>
+                    <span style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '7px',
+                      opacity: isActive ? 0.8 : 0.5,
+                      lineHeight: '1.1',
+                    }}>
+                      {step.action}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div style={{
             marginTop: '20px',
             fontFamily: "'Space Mono', monospace",
@@ -809,7 +984,7 @@ export function Activities() {
             color: 'rgba(17, 17, 17, 0.4)',
             textAlign: 'right',
           }}>
-            ♬ Contemporary &bull; Classical &bull; Choreography
+            ♬ Contemporary &bull; Western &bull; Choreography
           </div>
         </div>
 
@@ -829,6 +1004,16 @@ export function Activities() {
           0%, 100% {
             opacity: 1;
             box-shadow: 0 0 4px #ef4444;
+          }
+          50% {
+            opacity: 0.3;
+            box-shadow: 0 0 0px transparent;
+          }
+        }
+        @keyframes pulse-gold {
+          0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 4px #eccb58;
           }
           50% {
             opacity: 0.3;

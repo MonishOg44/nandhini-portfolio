@@ -31,15 +31,14 @@ export function Footer() {
       position: 'relative',
       overflow: 'hidden',
     }}>
-      
+
       {/* ── TOP BAND: Animated Character & Giant Background Typography ── */}
       <div style={{
         position: 'relative',
-        height: '420px',
+        height: 'clamp(320px, 35vw, 520px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       }}>
         {/* Giant Outlined Background Text */}
         <div style={{
@@ -56,7 +55,7 @@ export function Footer() {
           <span style={{
             fontFamily: "'Inter', sans-serif",
             fontWeight: 900,
-            fontSize: '11vw',
+            fontSize: 'clamp(40px, 11vw, 160px)',
             letterSpacing: '0.05em',
             color: 'transparent',
             WebkitTextStroke: '1.5px rgba(238, 229, 229, 0.13)',
@@ -66,7 +65,7 @@ export function Footer() {
           <span style={{
             fontFamily: "'Inter', sans-serif",
             fontWeight: 900,
-            fontSize: '11vw',
+            fontSize: 'clamp(40px, 11vw, 160px)',
             letterSpacing: '0.05em',
             color: 'transparent',
             WebkitTextStroke: '1.5px rgba(255, 255, 255, 0.15)',
@@ -89,7 +88,8 @@ export function Footer() {
             src={nandhiniCharacter} // The generated animated/illustrated full-body character of Nandhini
             alt="Nandhini Character"
             style={{
-              height: '380px',
+              height: '95%',
+              maxHeight: '380px',
               objectFit: 'contain',
               display: 'block',
               filter: 'drop-shadow(1px 0px 0px #ffffff) drop-shadow(-1px 0px 0px #ffffff) drop-shadow(0px 1px 0px #ffffff) drop-shadow(0px -1px 0px #ffffff) drop-shadow(5px 10px 25px rgba(0,0,0,0.5))',
@@ -141,13 +141,13 @@ export function Footer() {
             }}>
               Reach out
             </span>
-            
+
             <div style={{ display: 'flex', gap: 12 }}>
 
 
               {/* LinkedIn */}
               <a
-                href="https://www.linkedin.com/in/nandhini-s-7b0007312"
+                href="https://www.linkedin.com/in/nandhini-s-7b0007312?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ textDecoration: 'none' }}
@@ -166,6 +166,8 @@ export function Footer() {
               {/* Email */}
               <a
                 href="mailto:nandhini796s@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{ textDecoration: 'none' }}
                 onMouseEnter={() => setHoveredIcon('mail')}
                 onMouseLeave={() => setHoveredIcon(null)}

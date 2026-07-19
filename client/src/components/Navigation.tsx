@@ -56,7 +56,7 @@ export function Navigation() {
           backdropFilter: 'blur(40px) saturate(220%)',
           WebkitBackdropFilter: 'blur(40px) saturate(220%)',
           border: 'none',
-          boxShadow: isScrolled 
+          boxShadow: isScrolled
             ? '0 20px 40px -15px rgba(0, 0, 0, 0.08)'
             : '0 8px 24px -12px rgba(0, 0, 0, 0.03)',
           padding: '8px 24px 8px 30px', // More vertical and horizontal spacing
@@ -65,7 +65,7 @@ export function Navigation() {
         }}
       >
         {/* Brand logo link */}
-        <span 
+        <span
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           style={{
             fontFamily: "'Cormorant Garamond', serif",
@@ -129,7 +129,7 @@ export function Navigation() {
         }}
       >
         {/* Brand logo link */}
-        <span 
+        <span
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           style={{
             fontFamily: "'Cormorant Garamond', serif",
@@ -170,88 +170,196 @@ export function Navigation() {
           position: 'fixed',
           inset: 0,
           zIndex: 10000,
-          background: 'rgba(251, 248, 245, 0.82)', // Creamy white tint to match theme
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
+          backgroundColor: '#f7f5f0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           transition: 'all 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
           opacity: isMobileMenuOpen ? 1 : 0,
           pointerEvents: isMobileMenuOpen ? 'all' : 'none',
           transform: isMobileMenuOpen ? 'scale(1)' : 'scale(1.05)',
+          padding: '40px 24px',
+          overflow: 'hidden',
         }}
       >
-        {/* Close Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(false)}
+        {/* Clean graph paper grid background only */}
+        <svg
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
+          viewBox="0 0 390 844"
+          preserveAspectRatio="xMidYMid slice"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse">
+              <path d="M 22 0 L 0 0 0 22" fill="none" stroke="rgba(17,17,17,0.08)" strokeWidth="0.7"/>
+            </pattern>
+          </defs>
+          <rect width="390" height="844" fill="url(#grid)" />
+        </svg>
+
+        {/* CSS styles for animations inside the menu drawer */}
+        <style>{`
+          @keyframes menuLinkFadeIn {
+            0% {
+              opacity: 0;
+              transform: translate3d(0, 30px, 0);
+            }
+            100% {
+              opacity: 1;
+              transform: translate3d(0, 0, 0);
+            }
+          }
+          .mobile-menu-link-animate {
+            opacity: 0;
+            animation: menuLinkFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+        `}</style>
+
+        {/* Close Button & Header Row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '320px', zIndex: 2 }}>
+          <span
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: '9px',
+              letterSpacing: '0.2em',
+              color: 'rgba(17, 17, 17, 0.5)',
+              fontWeight: 600,
+            }}
+          >
+            MENU.
+          </span>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              background: 'rgba(17, 17, 17, 0.05)',
+              border: '1px solid rgba(17, 17, 17, 0.12)',
+              borderRadius: '9999px',
+              width: '38px',
+              height: '38px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            className="hover:bg-black/10 active:scale-95"
+          >
+            <X className="w-4 h-4 text-neutral-800" />
+          </button>
+        </div>
+
+        {/* Vertical Links List */}
+        <div
           style={{
-            position: 'absolute',
-            top: '24px',
-            right: '24px',
-            background: 'rgba(255, 255, 255, 0.45)',
-            border: '1px solid rgba(255, 255, 255, 0.65)',
-            borderRadius: '9999px',
-            width: '40px',
-            height: '40px',
+            width: '100%',
+            maxWidth: '320px',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            flexDirection: 'column',
+            gap: '24px',
+            alignItems: 'flex-start',
+            paddingLeft: '10px',
+            margin: 'auto 0',
+            zIndex: 2,
           }}
         >
-          <X className="w-4 h-4 text-[#111]" />
-        </button>
-
-        {/* Tactile Scrapbook Ticket inside the menu */}
-        <div 
-          className="relative max-w-[280px] w-full border border-black/10 rounded-lg p-8 shadow-[6px_10px_30px_rgba(0,0,0,0.08)] text-center overflow-hidden"
-          style={{
-            backgroundColor: '#faf8f5',
-            backgroundImage: `url('${crumpledPaper}')`,
-            backgroundBlendMode: 'multiply',
-          }}
-        >
-          {/* Punched hole margin detail at the top */}
-          <div className="absolute top-2 left-0 right-0 flex justify-around px-4 pointer-events-none">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="w-2 h-2 rounded-full bg-background border border-black/10 shadow-inner" />
-            ))}
-          </div>
-
-          <div className="text-[10px] font-mono tracking-[0.25em] text-foreground/45 uppercase mb-8 mt-2">
-            ✦ NAVIGATION INDEX ✦
-          </div>
-
-          {/* Links list */}
-          <div className="flex flex-col gap-6">
-            {navItems.map((item) => (
-              <button
+          {[
+            { label: 'ABOUT', href: '#skills', type: 'link' },
+            { label: 'TIMELINE', href: '#timeline', type: 'link' },
+            { label: 'PORTFOLIO', href: '#projects', type: 'link' },
+            { label: 'INSIGHTS', href: '#blog', type: 'link' },
+            { label: 'CONTACT', href: '#contact', type: 'link' },
+            { label: 'RESUME', href: `${import.meta.env.BASE_URL}resume.pdf`, type: 'external' },
+            { label: 'LINKEDIN', href: 'https://www.linkedin.com/in/nandhini-s-7b0007312?utm_source=share_via&utm_content=profile&utm_medium=member_ios', type: 'external' },
+          ].map((item, idx) => {
+            const numStr = String(idx + 1).padStart(2, '0');
+            const delay = isMobileMenuOpen ? `${0.1 + idx * 0.07}s` : '0s';
+            return (
+              <div
                 key={item.label}
-                onClick={() => handleNavClick(item.href)}
+                className={isMobileMenuOpen ? 'mobile-menu-link-animate' : ''}
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontWeight: 700,
-                  fontSize: '22px',
-                  fontStyle: 'italic',
-                  color: '#111111',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '16px',
+                  animationDelay: delay,
                 }}
-                className="hover:text-[#e63b2e] hover:scale-105 active:scale-95"
               >
-                {item.label}
-              </button>
-            ))}
-          </div>
+                {/* Number index */}
+                <span
+                  style={{
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: '11px',
+                    color: 'rgba(17, 17, 17, 0.4)',
+                    fontWeight: 500,
+                  }}
+                >
+                  {numStr}
+                </span>
 
-          <div className="mt-8 pt-6 border-t border-dashed border-black/10 text-[9px] font-mono text-foreground/40 uppercase tracking-widest">
-            Nandhini Portfolio
-          </div>
+                {item.type === 'link' ? (
+                  <button
+                    onClick={() => handleNavClick(item.href)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#111111',
+                      fontFamily: "'Outfit', sans-serif",
+                      fontSize: '26px',
+                      fontWeight: 700,
+                      letterSpacing: '0.03em',
+                      cursor: 'pointer',
+                      padding: 0,
+                      textAlign: 'left',
+                      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                    className="hover:text-[#e63b2e] hover:translate-x-2 active:scale-95"
+                  >
+                    {item.label}
+                  </button>
+                ) : (
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#111111',
+                      textDecoration: 'none',
+                      fontFamily: "'Outfit', sans-serif",
+                      fontSize: '26px',
+                      fontWeight: 700,
+                      letterSpacing: '0.03em',
+                      textAlign: 'left',
+                      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                    className="hover:text-[#e63b2e] hover:translate-x-2 active:scale-95"
+                  >
+                    {item.label}
+                  </a>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer info */}
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '320px',
+            borderTop: '1px solid rgba(17, 17, 17, 0.08)',
+            paddingTop: '20px',
+            fontSize: '8px',
+            fontFamily: "'Space Mono', monospace",
+            color: 'rgba(17, 17, 17, 0.5)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            textAlign: 'center',
+            zIndex: 2,
+          }}
+        >
+          EST. 2026 / NANDHINI PORTFOLIO
         </div>
       </div>
     </>

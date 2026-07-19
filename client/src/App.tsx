@@ -10,6 +10,7 @@ import CreatorCreditsPage from "./pages/CreatorCreditsPage";
 import { IntroPreloader } from "./components/IntroPreloader";
 import { CustomCursor } from "./components/CustomCursor";
 import { SmoothScroll } from "./components/SmoothScroll";
+import { TransitionProvider } from "./contexts/TransitionContext";
 
 function AppRouter() {
   return (
@@ -31,17 +32,18 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          {/* Awwwards $10,000 Premium Animations Suite */}
-          {!preloaderComplete && <IntroPreloader onComplete={() => setPreloaderComplete(true)} />}
-          <CustomCursor />
-          <div className="paper-grain" />
-          
-          <SmoothScroll>
-            <Toaster />
-            <AppRouter />
-          </SmoothScroll>
-        </TooltipProvider>
+        <TransitionProvider>
+          <TooltipProvider>
+            {/* Awwwards $10,000 Premium Animations Suite */}
+            {!preloaderComplete && <IntroPreloader onComplete={() => setPreloaderComplete(true)} />}
+            <CustomCursor />
+            
+            <SmoothScroll>
+              <Toaster />
+              <AppRouter />
+            </SmoothScroll>
+          </TooltipProvider>
+        </TransitionProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

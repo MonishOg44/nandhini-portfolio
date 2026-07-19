@@ -4,180 +4,221 @@ interface IntroPreloaderProps {
   onComplete: () => void;
 }
 
+/**
+ * IntroPreloader — Awwwards-grade cinematic intro.
+ *
+ * Sequence:
+ *   0 ms  → panel appears (instant, black)
+ *  350ms  → corner label fades in
+ *  700ms  → letters flip up one-by-one (overflow:hidden clip technique)
+ * 1700ms  → "PORTFOLIO" subtitle expands in
+ * 2000ms  → red rule line draws from center outward
+ * 3200ms  → hold complete, begin exit
+ * 3200ms  → single panel translates Y(-100%) with silky spring curve
+ * 4400ms  → done, onComplete fires
+ */
+
+const NAME = 'NANDHINI';
+const LETTER_STAGGER = 100; // ms between each letter (was 68)
+const LETTER_DUR = 850;     // ms for each letter's translateY transition (was 700)
+
+// Timing milestones (ms from mount)
+const T_LABEL    = 500;
+const T_LETTERS  = 900;
+const T_SUBTITLE = T_LETTERS + NAME.length * LETTER_STAGGER + 250;
+const T_LINE     = T_SUBTITLE + 400;
+const T_EXIT     = T_LINE    + 1500;
+const T_DONE     = T_EXIT    + 1400;
+
+// Spring curve used everywhere for that "buttery" feel
+const SPRING = 'cubic-bezier(0.16, 1, 0.3, 1)';
+const SILKY  = 'cubic-bezier(0.76, 0, 0.24, 1)';
+
 export function IntroPreloader({ onComplete }: IntroPreloaderProps) {
-  const [progress, setProgress] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
+  const [showLabel,    setShowLabel]    = useState(false);
+  const [showLetters,  setShowLetters]  = useState(false);
+  const [showSubtitle, setShowSubtitle] = useState(false);
+  const [showLine,     setShowLine]     = useState(false);
+  const [isExiting,    setIsExiting]    = useState(false);
+  const [isDone,       setIsDone]       = useState(false);
 
-  // High-end keyword cycle list matching Nandhini's themes
-  const keywords = ['COMMERCE', 'FINANCE', 'STRATEGY', 'CREATIVE', 'NANDHINI'];
-  const activeKeyword = keywords[Math.min(keywords.length - 1, Math.floor((progress / 100) * keywords.length))];
-
-  // Lock body scroll on load
+  // ── lock scroll ──────────────────────────────────────────────────────────
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, []);
 
+  // ── master timeline ───────────────────────────────────────────────────────
   useEffect(() => {
-    const duration = 1800; // Beautifully paced 1.8s duration
-    const interval = 20;
-    const steps = duration / interval;
-    let step = 0;
-
-    const timer = setInterval(() => {
-      step++;
-      // Custom easing curve for the progress count to decelerate near 100% (feels organic!)
-      const progressT = step / steps;
-      const easedT = 1 - Math.pow(1 - progressT, 3); // Cubic ease out
-      const current = Math.min(100, Math.floor(easedT * 100));
-      
-      setProgress(current);
-
-      if (step >= steps) {
-        clearInterval(timer);
-        setIsLoaded(true);
-        // Wait for the staggered column exit slide (1.4s total transition time)
-        setTimeout(() => {
-          setIsHidden(true);
-          document.body.style.overflow = '';
-          onComplete();
-        }, 1400);
-      }
-    }, interval);
-
-    return () => clearInterval(timer);
+    const timers = [
+      setTimeout(() => setShowLabel(true),    T_LABEL),
+      setTimeout(() => setShowLetters(true),  T_LETTERS),
+      setTimeout(() => setShowSubtitle(true), T_SUBTITLE),
+      setTimeout(() => setShowLine(true),     T_LINE),
+      setTimeout(() => setIsExiting(true),    T_EXIT),
+      setTimeout(() => {
+        setIsDone(true);
+        document.body.style.overflow = '';
+        onComplete();
+      }, T_DONE),
+    ];
+    return () => timers.forEach(clearTimeout);
   }, [onComplete]);
 
-  if (isHidden) return null;
+  if (isDone) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100vh',
-      zIndex: 99999,
-      pointerEvents: 'none',
-      display: 'flex',
-    }}>
-      {/* ── Staggered Vertical Columns ── */}
-      {[0, 1, 2].map((i) => (
+    <>
+      {/* ════════════════════════════════════════════════════════════════════
+          THE PANEL — single element that slides up on exit
+      ════════════════════════════════════════════════════════════════════ */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 99999,
+          background: '#000000',
+          transform: isExiting ? 'translateY(-100%)' : 'translateY(0%)',
+          transition: isExiting
+            ? `transform 1.3s ${SILKY}`
+            : 'none',
+          willChange: 'transform',
+        }}
+      >
+
+        {/* ── year / index label — bottom center ───────────────────────── */}
         <div
-          key={i}
           style={{
-            flex: 1,
-            height: '100%',
-            background: '#111111', // Matte charcoal
-            transition: 'transform 1.1s cubic-bezier(0.85, 0, 0.15, 1)',
-            transform: isLoaded ? 'translateY(-100%)' : 'translateY(0%)',
-            transitionDelay: `${i * 120}ms`, // 120ms staggered gap
+            position: 'absolute',
+            bottom: 36,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9,
+            letterSpacing: '0.32em',
+            color: 'rgba(245,240,235,0.45)',
+            opacity: showLabel && !isExiting ? 1 : 0,
+            transition: `opacity 0.7s ease 0.15s`,
+            pointerEvents: 'none',
+            userSelect: 'none',
           }}
-        />
-      ))}
-
-      {/* ── Centered Typographic Overlay ── */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#f5f0eb',
-        zIndex: 10,
-        transition: 'opacity 0.4s ease-in-out',
-        opacity: isLoaded ? 0 : 1, // Smoothly fade text out before column slide begins
-      }}>
-        {/* Subtle Brand Title */}
-        <span style={{
-          fontFamily: "'Space Mono', monospace",
-          fontSize: 10,
-          fontWeight: 400,
-          letterSpacing: '0.3em',
-          color: 'rgba(245, 240, 235, 0.4)',
-          textTransform: 'uppercase',
-          marginBottom: 20,
-        }}>
-          Nandhini Portfolio
-        </span>
-
-        {/* Morphing Eased Word Reveal */}
-        <div style={{
-          height: '6vw',
-          minHeight: 48,
-          overflow: 'hidden',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <h2
-            key={activeKeyword} // Triggers React keys for slide-up text animations
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(32px, 4.8vw, 72px)',
-              fontStyle: 'italic',
-              fontWeight: 300,
-              letterSpacing: '0.12em',
-              margin: 0,
-              animation: 'reveal-text 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
-            }}
-          >
-            {activeKeyword}
-          </h2>
+        >
+          2026
         </div>
 
-        {/* Main Monospaced Counter */}
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '9vw',
-          fontWeight: 300,
-          lineHeight: 1,
-          color: '#f5f0eb',
-          margin: '20px 0',
-          letterSpacing: '-0.02em',
-        }}>
-          {progress.toString().padStart(3, '0')}%
-        </h1>
+        {/* ── centre stage ─────────────────────────────────────────────── */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 0,
+          }}
+        >
+          {/* ── NAME letters — each wrapped in overflow:hidden mask ───── */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              // Slight breathing space between letters
+              gap: 'clamp(1px, 0.5vw, 7px)',
+            }}
+          >
+            {NAME.split('').map((char, i) => {
+              const delay = i * LETTER_STAGGER;
+              const visible = showLetters;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    overflow: 'hidden',
+                    // height mask — clip exactly to cap height
+                    lineHeight: 1,
+                    paddingBottom: '0.08em', // show descenders cleanly
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 'clamp(56px, 9.5vw, 130px)',
+                      fontWeight: 300,
+                      letterSpacing: '0.06em',
+                      color: '#f5f0eb',
+                      lineHeight: 1,
+                      transform: visible
+                        ? 'translateY(0px)'
+                        : 'translateY(108%)',
+                      transition: visible
+                        ? `transform ${LETTER_DUR}ms ${SPRING} ${delay}ms`
+                        : 'none',
+                      willChange: 'transform',
+                      userSelect: 'none',
+                    }}
+                  >
+                    {char}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
 
-        {/* Bottom Loading Progress Line */}
-        <div style={{
-          position: 'absolute',
-          bottom: '10vh',
-          width: 140,
-          height: 1,
-          background: 'rgba(245, 240, 235, 0.15)',
-        }}>
-          <div style={{
-            height: '100%',
-            width: `${progress}%`,
-            background: '#f5f0eb',
-            transition: 'width 0.1s linear',
-          }} />
+          {/* ── Red rule line ─────────────────────────────────────────── */}
+          <div
+            style={{
+              marginTop: 18,
+              height: 1,
+              width: showLine ? 'clamp(200px, 32vw, 480px)' : '0px',
+              background: 'linear-gradient(90deg, transparent 0%, #e63b2e 35%, #e63b2e 65%, transparent 100%)',
+              transition: showLine
+                ? `width 0.95s ${SPRING} 0.05s`
+                : 'none',
+              willChange: 'width',
+            }}
+          />
+
+          {/* ── PORTFOLIO subtitle ────────────────────────────────────── */}
+          <div
+            style={{
+              marginTop: 16,
+              overflow: 'hidden',
+              lineHeight: 1,
+            }}
+          >
+            <span
+              style={{
+                display: 'block',
+                fontFamily: "'Space Mono', monospace",
+                fontSize: 'clamp(9px, 0.85vw, 12px)',
+                fontWeight: 400,
+                letterSpacing: showSubtitle ? '0.55em' : '0.1em',
+                color: 'rgba(245,240,235,0.38)',
+                textTransform: 'uppercase',
+                transform: showSubtitle ? 'translateY(0)' : 'translateY(120%)',
+                opacity: showSubtitle ? 1 : 0,
+                transition: showSubtitle
+                  ? `transform 0.65s ${SPRING} 0.05s,
+                     opacity   0.5s  ease     0.05s,
+                     letter-spacing 0.9s ${SPRING} 0.05s`
+                  : 'none',
+                willChange: 'transform, opacity, letter-spacing',
+                userSelect: 'none',
+              }}
+            >
+              PORTFOLIO
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Embedded CSS Animations */}
+      {/* ── Keyframes injected once ─────────────────────────────────────────── */}
       <style>{`
-        @keyframes reveal-text {
-          0% {
-            transform: translateY(100%) skewY(4deg);
-            opacity: 0;
-          }
-          100% {
-            transform: translateY(0) skewY(0);
-            opacity: 1;
-          }
-        }
+        @keyframes ip-noop { from {} to {} }
       `}</style>
-    </div>
+    </>
   );
 }
 

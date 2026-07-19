@@ -14,9 +14,11 @@ const BG = '#fbf8f5';
 function RippleName({
   text,
   fontSize,
+  centered = false,
 }: {
   text: string;
   fontSize: number;
+  centered?: boolean;
 }) {
   const wrapRef  = useRef<HTMLDivElement>(null);
   const cvRef    = useRef<HTMLCanvasElement>(null);
@@ -37,15 +39,59 @@ function RippleName({
 
     let W = 0;
 
+    const drawFlowerSticker = (ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) => {
+      ctx.save();
+      ctx.fillStyle = '#e63b2e';
+      const rx = r * 0.1875;
+      const ry = r * 0.4583;
+      
+      [0, 30, 60, 90, 120, 150].forEach(deg => {
+        ctx.beginPath();
+        const rad = (deg * Math.PI) / 180;
+        ctx.ellipse(cx, cy, rx, ry, rad, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.2083, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.restore();
+    };
+
     const paint = () => {
       if (W <= 0) return;
       otx.fillStyle = BG;
       otx.fillRect(0, 0, W, H);
       otx.font = `900 ${fontSize}px 'Inter', sans-serif`;
       otx.fillStyle = '#111111';
-      otx.textAlign = 'left';
       otx.textBaseline = 'middle';
-      otx.fillText(text, pad, H / 2);
+
+      const dotlessText = text.replace(/i/g, 'ı').replace(/I/g, 'I');
+
+      if (centered) {
+        otx.textAlign = 'center';
+        otx.fillText(dotlessText, W / 2, H / 2);
+      } else {
+        otx.textAlign = 'left';
+        otx.fillText(dotlessText, pad, H / 2);
+      }
+
+      // Draw red flower stickers for every 'i'
+      const chars = text.split('');
+      const textW = otx.measureText(dotlessText).width;
+      const startX = centered ? (W - textW) / 2 : pad;
+
+      chars.forEach((char, index) => {
+        if (char.toLowerCase() === 'i') {
+          const precedingText = dotlessText.slice(0, index);
+          const precedingW = otx.measureText(precedingText).width;
+          const charW = otx.measureText('ı').width;
+          const cx = startX + precedingW + charW / 2;
+          const cy = H / 2 - fontSize * 0.38;
+          const flowerRadius = fontSize * 0.14;
+          drawFlowerSticker(otx, cx, cy, flowerRadius);
+        }
+      });
     };
 
     // ResizeObserver to handle mount & layout changes
@@ -68,13 +114,23 @@ function RippleName({
     }
 
     const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') {
+        mouse.current.active = false;
+        return;
+      }
       const r = cv.getBoundingClientRect();
       const mx = e.clientX - r.left;
       const my = e.clientY - r.top;
 
       // Restrict active activation only to the exact visual boundaries of the actual text characters
       const textW = otx.measureText(text).width;
-      const isOverText = mx >= pad && mx <= pad + textW && Math.abs(my - H / 2) < fontSize * 0.35;
+      let isOverText = false;
+      if (centered) {
+        const sx = (W - textW) / 2;
+        isOverText = mx >= sx && mx <= sx + textW && Math.abs(my - H / 2) < fontSize * 0.35;
+      } else {
+        isOverText = mx >= pad && mx <= pad + textW && Math.abs(my - H / 2) < fontSize * 0.35;
+      }
 
       if (isOverText) {
         mouse.current = {
@@ -183,7 +239,7 @@ function RippleName({
       cv.removeEventListener('pointerleave', onPointerLeave);
       cv.removeEventListener('pointerdown', onPointerMove);
     };
-  }, [text, fontSize]);
+  }, [text, fontSize, centered]);
 
   return (
     <div ref={wrapRef} style={{ width: '100%', position: 'relative' }}>
@@ -638,7 +694,7 @@ function AirDropCard({ mousePos }: { mousePos: { x: number; y: number } }) {
     // Trigger download of resume PDF after acceptance
     setTimeout(() => {
       const link = document.createElement('a');
-      link.href = '/resume.pdf';
+      link.href = `${import.meta.env.BASE_URL}resume.pdf`;
       link.download = 'Nandhini_S_Resume.pdf';
       document.body.appendChild(link);
       link.click();
@@ -1196,7 +1252,9 @@ export function Hero() {
   }, []);
 
   const mobile   = vw < 768;
-  const nameSize = Math.min(120, Math.max(52, vw * 0.09));
+  const nameSize = mobile
+    ? Math.min(84, Math.max(68, vw * 0.16))
+    : Math.min(120, Math.max(52, vw * 0.09));
 
   return (
     <section style={{
@@ -1241,67 +1299,71 @@ export function Hero() {
       )}
 
       {/* ── Pressed Ginkgo Leaf — top centre (replaced crumpled paper) ── */}
-      <div style={{
-        position: 'absolute',
-        top: mobile ? -20 : -30,
-        left: '50%',
-        transform: `translateX(-40%) rotate(-12deg) translate3d(${mousePos.x * -24}px, ${mousePos.y * -24}px, 0)`,
-        transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
-        zIndex: 2,
-        pointerEvents: 'none',
-      }}>
-        {/* Washi tape pinning the leaf stem */}
+      {!mobile && (
         <div style={{
           position: 'absolute',
-          bottom: 20,
-          left: 40,
-          zIndex: 10,
+          top: -30,
+          left: '50%',
+          transform: `translateX(-40%) rotate(-12deg) translate3d(${mousePos.x * -24}px, ${mousePos.y * -24}px, 0)`,
+          transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
+          zIndex: 2,
+          pointerEvents: 'none',
         }}>
-          <WashiTape rotation={-15} width={45} height={14} />
+          {/* Washi tape pinning the leaf stem */}
+          <div style={{
+            position: 'absolute',
+            bottom: 20,
+            left: 40,
+            zIndex: 10,
+          }}>
+            <WashiTape rotation={-15} width={45} height={14} />
+          </div>
+          <img
+            src={pressedGinkgo}
+            alt=""
+            aria-hidden
+            style={{
+              width: 210,
+              mixBlendMode: 'multiply',
+              display: 'block',
+            }}
+          />
         </div>
-        <img
-          src={pressedGinkgo}
-          alt=""
-          aria-hidden
-          style={{
-            width: mobile ? 140 : 210,
-            mixBlendMode: 'multiply',
-            display: 'block',
-          }}
-        />
-      </div>
+      )}
 
       {/* ── Vintage Ledger Page — top right (replaced handwritten note) ── */}
-      <div style={{
-        position: 'absolute',
-        top: mobile ? 30 : 40,
-        right: mobile ? 12 : 60,
-        transform: `translate3d(${mousePos.x * 14}px, ${mousePos.y * 14}px, 0)`,
-        transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
-        zIndex: 3,
-      }}>
-        {/* Washi tape pinning the ledger page */}
+      {!mobile && (
         <div style={{
           position: 'absolute',
-          top: -10,
-          left: 35,
-          zIndex: 10,
+          top: 40,
+          right: 60,
+          transform: `translate3d(${mousePos.x * 14}px, ${mousePos.y * 14}px, 0)`,
+          transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
+          zIndex: 3,
         }}>
-          <WashiTape rotation={10} width={65} height={18} />
+          {/* Washi tape pinning the ledger page */}
+          <div style={{
+            position: 'absolute',
+            top: -10,
+            left: 35,
+            zIndex: 10,
+          }}>
+            <WashiTape rotation={10} width={65} height={18} />
+          </div>
+          <img
+            src={ledgerScrap}
+            alt=""
+            aria-hidden
+            style={{
+              width: 165,
+              transform: 'rotate(6deg)',
+              mixBlendMode: 'multiply',
+              pointerEvents: 'none',
+              display: 'block',
+            }}
+          />
         </div>
-        <img
-          src={ledgerScrap}
-          alt=""
-          aria-hidden
-          style={{
-            width: mobile ? 120 : 165,
-            transform: 'rotate(6deg)',
-            mixBlendMode: 'multiply',
-            pointerEvents: 'none',
-            display: 'block',
-          }}
-        />
-      </div>
+      )}
 
       {/* ── Pressed Green Fern — bottom left (replaced crumpled paper) ── */}
       <div style={{
@@ -1316,18 +1378,18 @@ export function Hero() {
         {/* Washi tape securing the fern leaf */}
         <div style={{
           position: 'absolute',
-          top: 30,
-          left: 50,
+          top: mobile ? 12 : 30,
+          left: mobile ? 20 : 50,
           zIndex: 10,
         }}>
-          <WashiTape rotation={45} width={45} height={14} />
+          <WashiTape rotation={45} width={mobile ? 30 : 45} height={mobile ? 10 : 14} />
         </div>
         <img
           src={pressedFern}
           alt=""
           aria-hidden
           style={{
-            width: mobile ? 110 : 160,
+            width: mobile ? 70 : 160,
             transform: 'rotate(25deg) scaleX(-1)',
             mixBlendMode: 'multiply',
             display: 'block',
@@ -1348,30 +1410,34 @@ export function Hero() {
       }}>
 
         {/* ══ LEFT: Name + subtitle ══ */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 8,
+          alignItems: mobile ? 'center' : 'stretch',
+          textAlign: mobile ? 'center' : 'left',
+          width: '100%',
+        }}>
           {/* Name with ripple */}
-          <div style={{ marginLeft: -4 }}>
-            <RippleName text="Nandhini" fontSize={nameSize} />
+          <div style={{ marginLeft: mobile ? 0 : -4, width: '100%' }}>
+            <RippleName text="Nandhini" fontSize={nameSize} centered={mobile} />
           </div>
 
           {/* Red cursive subtitle — Snugger under the name */}
           <div style={{
             fontFamily: "'Satisfy', cursive",
-            fontSize: mobile ? 22 : Math.min(34, vw * 0.026),
+            fontSize: mobile ? 28 : Math.min(34, vw * 0.026),
             color: '#e63b2e',
-            marginTop: mobile ? -20 : -32,
-            marginLeft: 4,
+            marginTop: mobile ? -16 : -32,
+            marginLeft: mobile ? 0 : 4,
             letterSpacing: '0.01em',
             position: 'relative',
             zIndex: 12,
             pointerEvents: 'none',
+            textAlign: mobile ? 'center' : 'left',
+            width: '100%',
           }}>
             finance &amp; commerce
-          </div>
-
-          {/* Small flower bottom-left decoration */}
-          <div style={{ marginTop: 24, position: 'relative', zIndex: 12, pointerEvents: 'none' }}>
-            <FlowerSticker size={mobile ? 38 : 52} />
           </div>
         </div>
 

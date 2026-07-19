@@ -1,4 +1,6 @@
-import { ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ArrowRight, X, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import notePng from '../assets/note.png';
 import crumpledPaper from '../assets/crumpled-paper.png';
@@ -14,6 +16,11 @@ interface BlogPost {
   readTime: number;
   tags: string[];
   slug: string;
+  content: {
+    overview: string;
+    highlights: string[];
+    conclusion: string;
+  };
 }
 
 const blogPosts: BlogPost[] = [
@@ -25,6 +32,15 @@ const blogPosts: BlogPost[] = [
     readTime: 6,
     tags: ['FinTech', 'Digital Payments', 'India 2.0'],
     slug: 'india-fintech-evolution',
+    content: {
+      overview: "A comprehensive study evaluating the transition of India's financial sector from traditional, ledger-based banking services to a digital-first fintech ecosystem.",
+      highlights: [
+        "UPI Integration: Explores how Unified Payments Interface unified banking networks and simplified daily retail transactions.",
+        "Financial Inclusion: Evaluates the penetration of digital wallets and micro-credit systems in semi-urban and rural demographics.",
+        "AI Risk Assessment: Outlines how machine learning algorithms optimize credit risk scoring, fraud prevention, and real-time compliance."
+      ],
+      conclusion: "The research concludes that supportive regulatory frameworks by the RBI coupled with agile startup ecosystems form a blueprint for global digital banking transformation."
+    }
   },
   {
     id: '2',
@@ -34,6 +50,15 @@ const blogPosts: BlogPost[] = [
     readTime: 8,
     tags: ['Data Analytics', 'SQL Queries', 'MS Excel'],
     slug: 'business-data-analytics',
+    content: {
+      overview: "A business intelligence case brief executing data cleaning, transformation, and visualization patterns using Google Data Analytics guidelines.",
+      highlights: [
+        "Data Hygiene: Processed over 100,000 rows of raw retail data using SQL and Python (Pandas) to resolve structural inconsistencies.",
+        "Retention Modeling: Created dynamic cohort analysis tables in MS Excel to isolate regions with declining customer retention.",
+        "Dashboard Design: Built clean visual metrics displaying profit margins, operational expenditure trends, and inventory turnover ratios."
+      ],
+      conclusion: "The resulting dashboards allowed management to reallocate marketing budgets 15% more efficiently by targeting high-performance consumer demographics."
+    }
   },
   {
     id: '3',
@@ -43,6 +68,15 @@ const blogPosts: BlogPost[] = [
     readTime: 7,
     tags: ['Equity Analysis', 'Risk Management', 'Internship'],
     slug: 'equity-derivatives-analysis',
+    content: {
+      overview: "A detailed review of stock market analysis patterns, risk assessments, and compliance processes gained during an intensive internship at Divya Swaroopa Financial Services.",
+      highlights: [
+        "Valuation Reports: Formulated fundamental analyses on select blue-chip stocks using Discounted Cash Flow (DCF) and P/E multiples.",
+        "Derivatives Efficacy: Simulated option pricing models (Black-Scholes) to test hedging performance under volatile market conditions.",
+        "Regulatory Compliance: Audited transactional records to ensure alignment with SEBI regulations and onboarding guidelines."
+      ],
+      conclusion: "Developed practical expertise in analyzing systemic market risks and implementing financial instruments to protect retail portfolio yields."
+    }
   },
   {
     id: '4',
@@ -52,6 +86,15 @@ const blogPosts: BlogPost[] = [
     readTime: 10,
     tags: ['ACCA Qualification', 'Corporate Reporting', 'Accounting'],
     slug: 'acca-corporate-reporting',
+    content: {
+      overview: "Analyzing corporate governance, IFRS guidelines, and financial disclosure integrity in preparation for the ACCA professional qualification.",
+      highlights: [
+        "IFRS Guidelines: Analyzed lease capitalization rules (IFRS 16) and revenue recognition requirements (IFRS 15) for multinational firms.",
+        "Audit Trail Integrity: Examined internal check procedures, balance sheet reconciliation patterns, and risk exposure disclosures.",
+        "Corporate Ethics: Evaluated historical accounting case studies to highlight the impact of transparent disclosure on investor confidence."
+      ],
+      conclusion: "This research bridges the gap between academic accounting theory and the high-standard compliance practices required in modern corporate ledger audits."
+    }
   },
 ];
 
@@ -99,6 +142,52 @@ const getCardBackgroundStyle = (index: number) => {
 };
 
 export function Blog() {
+  const [activePostIndex, setActivePostIndex] = useState<number | null>(null);
+  const [renderedPostIndex, setRenderedPostIndex] = useState<number | null>(null);
+  const [modalMounted, setModalMounted] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleClose = () => {
+    setActivePostIndex(null);
+  };
+
+  // Sync index to mount/unmount and visibility states for transition
+  useEffect(() => {
+    if (activePostIndex !== null) {
+      setRenderedPostIndex(activePostIndex);
+      setModalMounted(true);
+      // Small timeout to allow the DOM node to mount and paint its initial opacity: 0 state
+      const timer = setTimeout(() => {
+        setModalVisible(true);
+      }, 25);
+      // Lock parent body scroll
+      document.body.style.overflow = 'hidden';
+      return () => {
+        clearTimeout(timer);
+      };
+    } else {
+      setModalVisible(false);
+      const timer = setTimeout(() => {
+        setModalMounted(false);
+        setRenderedPostIndex(null);
+      }, 300); // Wait for transition out to finish
+      // Restore parent body scroll
+      document.body.style.overflow = '';
+      return () => clearTimeout(timer);
+    }
+  }, [activePostIndex]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Alternating tilts to mimic collage clippings
   const rotations = [
     'rotate(0.6deg)',
@@ -106,6 +195,8 @@ export function Blog() {
     'rotate(0.4deg)',
     'rotate(-0.5deg)',
   ];
+
+  const activePost = renderedPostIndex !== null ? blogPosts[renderedPostIndex] : null;
 
   return (
     <section className="py-24 bg-[#fbf8f5] border-b border-border relative overflow-hidden">
@@ -118,10 +209,10 @@ export function Blog() {
 
       <div className="container max-w-6xl mx-auto px-6 relative z-10">
         <div className="mb-20 animate-fade-in text-center flex flex-col items-center justify-center">
-          <PremiumTextRipple 
-            text="Financial Insights" 
+          <PremiumTextRipple
+            text="Financial Insights"
             fontSize={64}
-            height={110} 
+            height={110}
             className="mb-3"
           />
           <p className="text-foreground/70 text-base max-w-2xl font-light mt-4 leading-relaxed font-serif italic mx-auto">
@@ -137,13 +228,13 @@ export function Blog() {
               <article
                 key={post.id}
                 className="group animate-fade-in"
-                style={{ 
+                style={{
                   animationDelay: `${index * 60}ms`,
                   transform: cardRotation,
                 }}
               >
                 {/* Vintage Journal Scrap clipping card */}
-                <div 
+                <div
                   className="relative border border-black/10 rounded shadow-[4px_6px_20px_rgba(0,0,0,0.05)] hover:shadow-[8px_12px_28px_rgba(0,0,0,0.09)] group-hover:scale-[1.015] group-hover:rotate-0 transition-all duration-300 h-full flex flex-col p-8 overflow-hidden"
                   style={getCardBackgroundStyle(index)}
                 >
@@ -153,15 +244,12 @@ export function Blog() {
                   {/* Red Notebook Margin line */}
                   <div className="absolute left-4 top-0 bottom-0 w-px bg-red-200/50" />
 
-                  {/* Header: Date Archive Stamp and read time */}
+                  {/* Header: Date Archive Stamp */}
                   <div className="flex justify-between items-center mb-4 pl-2">
                     {/* Archival Ink Stamp */}
                     <div className="border border-red-800/25 text-red-800/75 font-mono text-[9px] px-2 py-0.5 rounded tracking-widest uppercase font-semibold">
                       FILE // {post.date.toUpperCase()}
                     </div>
-                    <span className="text-[10px] text-foreground/50 font-mono tracking-wider">
-                      {post.readTime} MIN READ
-                    </span>
                   </div>
 
                   {/* Title */}
@@ -187,11 +275,11 @@ export function Blog() {
                   </div>
 
                   {/* Read article link */}
-                  <div className="pl-2 pt-4 border-t border-dashed border-black/10 mt-auto z-10">
+                  <div className="pt-4 border-t border-dashed border-black/10 mt-auto z-10">
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-foreground hover:text-[#e63b2e] hover:bg-[#e63b2e]/5 pl-0 font-mono text-[9px] tracking-widest uppercase rounded-none transition-colors"
-                      onClick={() => alert(`Opening analysis: ${post.title}`)}
+                      className="w-full justify-start text-foreground/70 group-hover:text-[#e63b2e] group-hover:bg-[#e63b2e]/5 hover:text-[#e63b2e] hover:bg-[#e63b2e]/5 px-3 py-2 font-mono text-[9px] tracking-widest uppercase rounded-md transition-all duration-300 ease-in-out"
+                      onClick={() => setActivePostIndex(index)}
                     >
                       Read Case Brief Summary
                       <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
@@ -203,6 +291,130 @@ export function Blog() {
           })}
         </div>
       </div>
+
+      {/* Immersive Case Brief Modal - Mounted via React Portal at body level to bypass stacking context & viewport bugs */}
+      {modalMounted && activePost !== null && renderedPostIndex !== null && createPortal(
+        <div
+          className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300"
+          style={{
+            opacity: modalVisible ? 1 : 0,
+            pointerEvents: modalVisible ? 'auto' : 'none',
+          }}
+          onClick={handleClose}
+        >
+          {/* vintage journal style card */}
+          <div
+            className="relative w-full max-w-2xl border border-black/15 rounded-lg shadow-2xl overflow-hidden flex flex-col p-5 sm:p-8 md:p-10 transition-all duration-300 ease-out"
+            style={{
+              ...getCardBackgroundStyle(renderedPostIndex),
+              maxHeight: '90vh',
+              opacity: modalVisible ? 1 : 0,
+              transform: modalVisible ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(12px)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Small piece of washi tape at top left corner */}
+            <div className="absolute top-[-6px] left-6 sm:left-10 w-16 h-5 bg-[#eccb58]/40 border-x border-dashed border-black/5 transform -rotate-2 z-10" />
+
+            {/* Red Notebook Margin line */}
+            <div className="absolute left-4 sm:left-5 md:left-7 top-0 bottom-0 w-px bg-red-200/60" />
+
+            {/* Close Button top right */}
+            <button
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 rounded-full text-foreground/50 hover:text-[#e63b2e] hover:bg-black/5 transition-colors z-20"
+              onClick={handleClose}
+              aria-label="Close dialog"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Scrollable container for text to make it extremely responsive on small screens */}
+            <div className="overflow-y-auto pr-2 pl-4 sm:pl-8 flex-1 mt-3 sm:mt-4 scrollbar-thin">
+              {/* Stamp */}
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <div className="border border-red-800/35 text-red-800/80 font-mono text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded tracking-widest uppercase font-semibold">
+                  ARCHIVE // FILE {activePost.date.toUpperCase()}
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground mb-3 sm:mb-4 font-serif italic leading-tight">
+                {activePost.title}
+              </h2>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 mb-4 sm:mb-6 z-10">
+                {activePost.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-0.5 bg-[#ece6de]/70 text-foreground/80 text-[9px] sm:text-[10px] rounded font-mono border border-black/5"
+                  >
+                    #{tag.toLowerCase()}
+                  </span>
+                ))}
+              </div>
+
+              {/* Binder line separator */}
+              <div className="w-full border-t border-dashed border-black/10 my-4 sm:my-6" />
+
+              {/* Overview Section */}
+              <div className="mb-4 sm:mb-6">
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-[#e63b2e] mb-1.5 sm:mb-2 font-bold">// Overview</h4>
+                <p className="text-foreground/90 text-xs sm:text-sm font-light leading-relaxed">
+                  {activePost.content.overview}
+                </p>
+              </div>
+
+              {/* Highlights Section */}
+              <div className="mb-4 sm:mb-6">
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-[#e63b2e] mb-1.5 sm:mb-2 font-bold">// Key Highlights</h4>
+                <ul className="space-y-2 sm:space-y-3.5 pl-0">
+                  {activePost.content.highlights.map((highlight, idx) => (
+                    <li key={idx} className="text-foreground/95 text-xs sm:text-sm font-light leading-relaxed flex items-start gap-2.5">
+                      <span className="text-[#eccb58] font-bold mt-[1px]">•</span>
+                      <span>{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Conclusion Section */}
+              <div className="mb-6 sm:mb-8">
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-[#e63b2e] mb-1.5 sm:mb-2 font-bold">// Conclusion</h4>
+                <p className="text-foreground/90 text-xs sm:text-sm font-light leading-relaxed italic">
+                  {activePost.content.conclusion}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="border-t border-dashed border-black/10 pt-4 sm:pt-5 mt-3 sm:mt-4 pl-4 sm:pl-8 flex flex-col sm:flex-row gap-3 justify-between items-center z-10 flex-shrink-0">
+              <a
+                href="https://www.linkedin.com/in/nandhini-s-7b0007312?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto no-underline"
+              >
+                <Button
+                  className="w-full sm:w-auto text-[9px] sm:text-[10px] tracking-widest uppercase font-mono bg-foreground text-background hover:bg-foreground/90 py-3 px-4 sm:py-4 sm:px-5 rounded-md flex items-center justify-center gap-1.5 transition-all duration-300 ease-in-out"
+                >
+                  View Full Article on LinkedIn
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Button>
+              </a>
+
+              <Button
+                variant="ghost"
+                className="w-full sm:w-auto text-[9px] sm:text-[10px] tracking-widest uppercase font-mono text-foreground/60 hover:text-foreground hover:bg-black/5 rounded-md border border-black/10 hover:border-black/20 transition-all duration-300 ease-in-out"
+                onClick={handleClose}
+              >
+                Close Brief
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </section>
   );
 }

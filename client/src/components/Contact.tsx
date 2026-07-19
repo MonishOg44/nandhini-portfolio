@@ -1,92 +1,12 @@
-import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { Mail, Linkedin, Download } from 'lucide-react';
+import { useTransition } from '../contexts/TransitionContext';
+import { Mail, Linkedin, Download, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
 import { PremiumTextRipple } from './PremiumTextRipple';
 
-function FuturisticPopup({ message, onClose }: { message: string; onClose: () => void }) {
-  return (
-    <div 
-      className="absolute right-4 -top-10 z-30 flex items-center gap-2 px-3 py-1.5 rounded bg-[#e63b2e] border border-[#ff8e86] text-white text-[10px] font-mono uppercase tracking-wider shadow-[0_0_15px_rgba(230,59,46,0.35)] animate-in fade-in zoom-in-95 duration-200"
-      role="alert"
-    >
-      <div className="flex h-1.5 w-1.5 relative">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
-      </div>
-      <span>{message}</span>
-      <button 
-        type="button" 
-        onClick={onClose} 
-        className="ml-1 text-white/60 hover:text-white transition-colors focus:outline-none text-[8.5px]"
-      >
-        ✕
-      </button>
-      {/* Speech bubble arrow pointing to input */}
-      <div className="absolute bottom-[-3px] right-6 w-1.5 h-1.5 bg-[#e63b2e] border-r border-b border-[#ff8e86] transform rotate-45"></div>
-    </div>
-  );
-}
+const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdDcK1Eqq2I7DU5XZivsB33QCMqumLoWVTdE2Hcx1g67pgRZQ/viewform?usp=header';
 
 export function Contact() {
-  const [, navigate] = useLocation();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error reactively on typing
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Invalid email address';
-    }
-    if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      toast.error('Please correct the validation errors before sending.');
-      return;
-    }
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      toast.success('Message sent! I\'ll get back to you soon.');
-      setFormData({ name: '', email: '', message: '' });
-      setIsSubmitting(false);
-    }, 1000);
-  };
+  const { triggerSlashTransition } = useTransition();
 
   return (
     <section className="py-20 bg-background border-b border-border">
@@ -104,101 +24,45 @@ export function Contact() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Contact Form */}
+          {/* Google Form CTA Card */}
           <div className="lg:col-span-2 animate-fade-in">
-            <form noValidate onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-8">
-              <div className="space-y-6">
-                {/* Name input */}
-                <div>
-                  <label htmlFor="name" className="block text-foreground font-medium mb-2 text-sm">
-                    Name
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="Your name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className={`bg-secondary border-border text-foreground placeholder:text-foreground/40 transition-colors ${
-                        errors.name ? 'border-[#e63b2e] focus-visible:ring-[#e63b2e]' : ''
-                      }`}
-                    />
-                    {errors.name && (
-                      <FuturisticPopup 
-                        message={errors.name} 
-                        onClose={() => setErrors(prev => ({ ...prev, name: undefined }))} 
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Email input */}
-                <div>
-                  <label htmlFor="email" className="block text-foreground font-medium mb-2 text-sm">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className={`bg-secondary border-border text-foreground placeholder:text-foreground/40 transition-colors ${
-                        errors.email ? 'border-[#e63b2e] focus-visible:ring-[#e63b2e]' : ''
-                      }`}
-                    />
-                    {errors.email && (
-                      <FuturisticPopup 
-                        message={errors.email} 
-                        onClose={() => setErrors(prev => ({ ...prev, email: undefined }))} 
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Message textarea */}
-                <div>
-                  <label htmlFor="message" className="block text-foreground font-medium mb-2 text-sm">
-                    Message
-                  </label>
-                  <div className="relative">
-                    <Textarea
-                      id="message"
-                      name="message"
-                      placeholder="Tell me about your project or inquiry..."
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={5}
-                      className={`bg-secondary border-border text-foreground placeholder:text-foreground/40 resize-none transition-colors ${
-                        errors.message ? 'border-[#e63b2e] focus-visible:ring-[#e63b2e]' : ''
-                      }`}
-                    />
-                    {errors.message && (
-                      <FuturisticPopup 
-                        message={errors.message} 
-                        onClose={() => setErrors(prev => ({ ...prev, message: undefined }))} 
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Submit button */}
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-mono text-xs tracking-wider"
-                >
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
-                </Button>
+            <div className="bg-card border border-border rounded-lg p-8 flex flex-col items-center justify-center text-center gap-6" style={{ minHeight: 280 }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #e63b2e 0%, #ff6b5e 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px rgba(230,59,46,0.25)',
+                }}
+              >
+                <Mail style={{ width: 24, height: 24, color: '#ffffff' }} />
               </div>
-            </form>
+              <div>
+                <h3 className="text-foreground font-semibold text-lg mb-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                  Have a question or want to connect?
+                </h3>
+                <p className="text-foreground/50 text-sm font-light max-w-md leading-relaxed">
+                  Fill out a quick form and I'll get back to you as soon as possible. Looking forward to hearing from you!
+                </p>
+              </div>
+              <a
+                href={GOOGLE_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full max-w-xs px-6 py-3 rounded-md text-white font-mono text-xs tracking-wider uppercase transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #e63b2e 0%, #c9302a 100%)',
+                  boxShadow: '0 4px 14px rgba(230,59,46,0.3)',
+                }}
+              >
+                <ExternalLink style={{ width: 14, height: 14 }} />
+                Send a Message
+              </a>
+            </div>
           </div>
 
           {/* Contact Info & Links */}
@@ -212,6 +76,8 @@ export function Contact() {
                 <div className="space-y-3">
                   <a
                     href="mailto:nandhini796s@gmail.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-3 text-foreground hover:text-accent transition-colors"
                   >
                     <Mail className="w-4 h-4 text-accent" />
@@ -227,7 +93,7 @@ export function Contact() {
                 </h3>
                 <div className="space-y-3">
                   <a
-                    href="https://www.linkedin.com/in/nandhini-s-7b0007312"
+                    href="https://www.linkedin.com/in/nandhini-s-7b0007312?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-foreground hover:text-accent transition-colors"
@@ -244,7 +110,7 @@ export function Contact() {
                 variant="outline"
                 asChild
               >
-                <a href="/resume.pdf" download="Nandhini_S_Resume.pdf">
+                <a href={`${import.meta.env.BASE_URL}resume.pdf`} download="Nandhini_S_Resume.pdf">
                   <Download className="w-4 h-4 mr-2" />
                   Download CV / Resume
                 </a>
@@ -253,7 +119,7 @@ export function Contact() {
               {/* Creator Credits button — notebook hand-drawn style */}
               <button
                 id="creator-credits-btn"
-                onClick={() => navigate('/credits')}
+                onClick={() => triggerSlashTransition('/credits')}
                 style={{
                   width: '100%',
                   background: '#fffdf8',
@@ -290,3 +156,4 @@ export function Contact() {
     </section>
   );
 }
+
