@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import CreatorCreditsPage from "./pages/CreatorCreditsPage";
 import { IntroPreloader } from "./components/IntroPreloader";
 import { CustomCursor } from "./components/CustomCursor";
+import { LandscapeWarning } from "./components/LandscapeWarning";
 import { SmoothScroll } from "./components/SmoothScroll";
 import { TransitionProvider } from "./contexts/TransitionContext";
 
@@ -18,12 +19,13 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <WouterRouter base={import.meta.env.DEV ? "" : "/nandhini-portfolio"}>
+        <WouterRouter base="/nandhini-portfolio">
           <TransitionProvider>
             <TooltipProvider>
               {/* Awwwards $10,000 Premium Animations Suite */}
               {!preloaderComplete && <IntroPreloader onComplete={() => setPreloaderComplete(true)} />}
               <CustomCursor />
+              <LandscapeWarning />
               
               <SmoothScroll>
                 <Toaster />

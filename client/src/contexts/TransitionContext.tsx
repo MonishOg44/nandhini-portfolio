@@ -9,15 +9,8 @@ interface TransitionContextType {
 const TransitionContext = createContext<TransitionContextType | undefined>(undefined);
 
 function NinjaSlashOverlay({ state }: { state: 'slashing-in' | 'closed' | 'slashing-out' }) {
-  const [animationClass, setAnimationClass] = useState('');
-
-  useEffect(() => {
-    if (state === 'slashing-in') {
-      setAnimationClass('in');
-    } else if (state === 'slashing-out') {
-      setAnimationClass('out');
-    }
-  }, [state]);
+  const topClass = state === 'slashing-in' ? 'panel-top-in' : state === 'slashing-out' ? 'panel-top-out' : '';
+  const bottomClass = state === 'slashing-in' ? 'panel-bottom-in' : state === 'slashing-out' ? 'panel-bottom-out' : '';
 
   return (
     <div
@@ -86,7 +79,7 @@ function NinjaSlashOverlay({ state }: { state: 'slashing-in' | 'closed' | 'slash
 
       {/* Top Left Panel Half (1.5% overlap down to prevent subpixel hairline gap bugs) */}
       <div
-        className={animationClass === 'in' ? 'panel-top-in' : animationClass === 'out' ? 'panel-top-out' : ''}
+        className={topClass}
         style={{
           position: 'absolute',
           top: 0,
@@ -95,13 +88,13 @@ function NinjaSlashOverlay({ state }: { state: 'slashing-in' | 'closed' | 'slash
           height: '100%',
           background: '#111111', // Matte black
           clipPath: 'polygon(0 0, 100% 0, 100% 66.5%, 0 36.5%)',
-          transform: state === 'closed' || state === 'slashing-out' ? 'translate3d(0, 0, 0)' : 'translate3d(-105%, -105%, 0)',
+          transform: state === 'closed' ? 'translate3d(0, 0, 0)' : 'translate3d(-105%, -105%, 0)',
         }}
       />
 
       {/* Bottom Right Panel Half (1.5% overlap up to prevent subpixel hairline gap bugs) */}
       <div
-        className={animationClass === 'in' ? 'panel-bottom-in' : animationClass === 'out' ? 'panel-bottom-out' : ''}
+        className={bottomClass}
         style={{
           position: 'absolute',
           top: 0,
@@ -110,7 +103,7 @@ function NinjaSlashOverlay({ state }: { state: 'slashing-in' | 'closed' | 'slash
           height: '100%',
           background: '#111111', // Matte black
           clipPath: 'polygon(0 33.5%, 100% 63.5%, 100% 100%, 0 100%)',
-          transform: state === 'closed' || state === 'slashing-out' ? 'translate3d(0, 0, 0)' : 'translate3d(105%, 105%, 0)',
+          transform: state === 'closed' ? 'translate3d(0, 0, 0)' : 'translate3d(105%, 105%, 0)',
         }}
       />
 
@@ -221,13 +214,18 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const [, navigate] = useLocation();
 
   const triggerSlashTransition = (targetPath: string) => {
-    if (slashState !== 'idle') return;
+    console.log("[Transition] triggerSlashTransition called with targetPath:", targetPath, "current state:", slashState);
+    if (slashState !== 'idle') {
+      console.warn("[Transition] Cannot transition: state is not idle");
+      return;
+    }
 
     // 1. Kick off slash close
     setSlashState('slashing-in');
 
     // 2. Once screens hit center and meet (1800ms), perform wouter navigation
     setTimeout(() => {
+      console.log("[Transition] Performing navigation to:", targetPath);
       navigate(targetPath);
       setSlashState('slashing-out');
 

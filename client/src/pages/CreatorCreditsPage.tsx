@@ -80,12 +80,14 @@ function RippleTitle({
       for (const entry of entries) {
         const width = Math.floor(entry.contentRect.width);
         if (width > 0 && width !== W) {
-          W = width;
-          cv.width = W;
-          cv.height = H;
-          off.width = W;
-          off.height = H;
-          paint();
+          requestAnimationFrame(() => {
+            W = width;
+            cv.width = W;
+            cv.height = H;
+            off.width = W;
+            off.height = H;
+            paint();
+          });
         }
       }
     });
@@ -235,7 +237,7 @@ function RippleTitle({
 export default function CreatorCreditsPage() {
   const [, navigate] = useLocation();
   const { triggerSlashTransition } = useTransition();
-  const [entered, setEntered] = useState(false);
+  const [entered, setEntered] = useState(true);
   const [leaving, setLeaving] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [ripples, setRipples] = useState<{ x: number, y: number, id: number }[]>([]);
@@ -246,11 +248,6 @@ export default function CreatorCreditsPage() {
     const handleResize = () => setVw(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 60);
-    return () => clearTimeout(t);
   }, []);
 
   const goBack = () => {
@@ -277,6 +274,8 @@ export default function CreatorCreditsPage() {
     ? Math.min(100, Math.max(50, vw * 0.18))
     : Math.min(220, Math.max(90, vw * 0.15));
   const titleSpacing = mobile ? -2 : -6;
+
+  console.log("[CreatorCreditsPage] Rendered - entered:", entered, "leaving:", leaving, "computed opacity:", leaving ? 0 : entered ? 1 : 0);
 
   return (
     <div 
@@ -705,7 +704,7 @@ export default function CreatorCreditsPage() {
           <span className="separator">/</span>
           <span>Tailwind CSS</span>
           <span className="separator">/</span>
-          <span>Wouter</span>
+          <span>Router</span>
           <span className="separator">/</span>
           <span>Vite</span>
           <span className="separator">/</span>

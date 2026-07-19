@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface PremiumTextRippleProps {
   text: string;
@@ -28,6 +28,18 @@ export function PremiumTextRipple({
   const rippleStrengthRef = useRef(0);
   const timeRef = useRef(0);
 
+  const [isMobileOrTouch, setIsMobileOrTouch] = useState(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const isMobile = window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches;
+      setIsMobileOrTouch(isMobile);
+    };
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
   // Responsive metrics ref
   const metricsRef = useRef({
     fontSize: fontSize,
@@ -39,6 +51,7 @@ export function PremiumTextRipple({
   const H = metricsRef.current.H;
 
   useEffect(() => {
+    if (isMobileOrTouch) return;
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext('2d'); if (!ctx) return;
 
@@ -317,7 +330,55 @@ export function PremiumTextRipple({
       canvas.removeEventListener('pointerdown', handlePointerMove);
       cancelAnimationFrame(animationId);
     };
-  }, [text, fontSize, fontFamily, textColor, bgColor, fontWeightStyle]);
+  }, [text, fontSize, fontFamily, textColor, bgColor, fontWeightStyle, isMobileOrTouch]);
+
+  if (isMobileOrTouch) {
+    const resolvedFg = textColor || 'var(--foreground)';
+    const fontW = fontWeightStyle.includes('600') ? 600 : fontWeightStyle.includes('bold') ? 'bold' : 'normal';
+    const fontS = fontWeightStyle.includes('italic') ? 'italic' : 'normal';
+    
+    // Scale font size down slightly on very small screens to fit perfectly
+    const finalSize = fontSize < 64 ? fontSize : 'clamp(32px, 8vw, 48px)';
+    
+    return (
+      <div 
+        className={`w-full text-center relative select-none ${className}`}
+        style={{
+          fontFamily,
+          fontSize: finalSize,
+          color: resolvedFg,
+          fontWeight: fontW,
+          fontStyle: fontS,
+          padding: '12px 0',
+          position: 'relative',
+        }}
+      >
+        <span style={{ position: 'relative', display: 'inline-block' }}>
+          {text}
+          <span 
+            style={{
+              position: 'absolute',
+              bottom: '-4px',
+              left: 0,
+              width: '100%',
+              height: '1.2px',
+              backgroundColor: resolvedFg,
+            }}
+          />
+          <span 
+            style={{
+              position: 'absolute',
+              bottom: '-5px',
+              right: '-11px',
+              width: '3px',
+              height: '3px',
+              backgroundColor: resolvedFg,
+            }}
+          />
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className={`w-full relative select-none ${className}`}>

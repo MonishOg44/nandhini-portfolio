@@ -6,8 +6,21 @@ export function CustomCursor() {
   
   const [hovered, setHovered] = useState(false);
   const [hidden, setHidden] = useState(true);
+  const [isMobileOrTouch, setIsMobileOrTouch] = useState(false);
 
   useEffect(() => {
+    const checkDevice = () => {
+      const isMobile = window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches;
+      setIsMobileOrTouch(isMobile);
+    };
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  useEffect(() => {
+    if (isMobileOrTouch) return;
+
     let mx = 0;
     let my = 0;
     let rx = 0;
@@ -83,7 +96,7 @@ export function CustomCursor() {
     };
   }, []);
 
-  if (hidden) return null;
+  if (isMobileOrTouch || hidden) return null;
 
   return (
     <>

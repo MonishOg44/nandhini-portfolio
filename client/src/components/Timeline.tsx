@@ -13,6 +13,16 @@ interface TimelineItem {
 
 const timelineData: TimelineItem[] = [
   {
+    date: 'PURSUING',
+    role: 'ACCA Candidate',
+    organization: 'Association of Chartered Certified Accountants',
+    description: [
+      'Currently preparing for the ACCA (Skills Level) examinations to achieve international chartered qualification.'
+    ],
+    type: 'education',
+    color: '#386a54' // Sage Green
+  },
+  {
     date: 'JUN 2026',
     role: 'Google Data Analytics Professional',
     organization: 'Coursera / Google Certification',
@@ -35,16 +45,15 @@ const timelineData: TimelineItem[] = [
     color: '#386a54' // Sage Green
   },
   {
-    date: 'DEC 2023 – JAN 2024',
-    role: 'Finance Intern',
-    organization: 'Divya Swaroopa Financial Services Pvt. Ltd.',
+    date: '2025 – 2026',
+    role: 'President & Coordinator',
+    organization: 'Diversity, Equity & Inclusivity (D.E.I.) Club',
     description: [
-      'Assisted in technical and fundamental analysis of equity and derivatives markets.',
-      'Conducted financial research and gained exposure to investment analysis and modeling.',
-      'Developed understanding of SEBI regulations, compliance, and financial risk management.'
+      'Led student initiatives, workshops, and campus awareness programs.',
+      'Coordinated extensively with faculty members, student committees, and guest speakers.'
     ],
-    type: 'experience',
-    color: '#e63b2e' // Crimson Red
+    type: 'leadership',
+    color: '#b28900' // Dark Gold
   },
   {
     date: '2024',
@@ -58,25 +67,16 @@ const timelineData: TimelineItem[] = [
     color: '#7c533c' // Terracotta
   },
   {
-    date: '2025 – 2026',
-    role: 'President & Coordinator',
-    organization: 'Diversity, Equity & Inclusivity (D.E.I.) Club',
+    date: 'DEC 2023 – JAN 2024',
+    role: 'Share Market and Finance Intern',
+    organization: 'Divya Swaroopa Financial Services Pvt. Ltd.',
     description: [
-      'Led student initiatives, workshops, and campus awareness programs.',
-      'Coordinated extensively with faculty members, student committees, and guest speakers.'
+      'Assisted in technical and fundamental analysis of equity and derivatives markets.',
+      'Conducted financial research and gained exposure to investment analysis and modeling.',
+      'Developed understanding of SEBI regulations, compliance, and financial risk management.'
     ],
-    type: 'leadership',
-    color: '#b28900' // Dark Gold
-  },
-  {
-    date: 'PURSUING',
-    role: 'ACCA Candidate',
-    organization: 'Association of Chartered Certified Accountants',
-    description: [
-      'Currently preparing for the ACCA (Skills Level) examinations to achieve international chartered qualification.'
-    ],
-    type: 'education',
-    color: '#386a54' // Sage Green
+    type: 'experience',
+    color: '#e63b2e' // Crimson Red
   }
 ];
 
